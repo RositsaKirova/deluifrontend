@@ -1,6 +1,8 @@
 import React from 'react'
 import APIService from '../service/APIService'
 
+//test git
+
 export default class TruthValueAnswerComponent extends React.Component {
 
     constructor(props) {
