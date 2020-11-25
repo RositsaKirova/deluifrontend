@@ -13,6 +13,8 @@ export default class TruthValueAnswerComponent extends React.Component {
         }
     }
 
+    //get answer part
+    /*
     componentDidMount(){
         APIService.getTruthValueAnswer().then((response) => {
             console.log(response)
@@ -23,6 +25,8 @@ export default class TruthValueAnswerComponent extends React.Component {
                 console.log('Response parsing failed. Error: ', ex);
             });;
     }
+
+     */
 
     render() {
         return (
