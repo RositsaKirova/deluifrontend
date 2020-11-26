@@ -1,4 +1,7 @@
-.Avatar{
-  position: absolute;
-  right: 150px;
+.rowHeader{
+    display:flex;
+    flex-direction:row;
+    align-items: center;
+    justify-content: center;
 }
+.rowC{display:flex; flex-direction:row;}

@@ -13,6 +13,7 @@ const useStyles = makeStyles((theme) => ({
         top: 28,
         right: 0,
         left: 0,
+        width: 200,
         zIndex: 1,
         border: '1px solid',
         padding: theme.spacing(1),
@@ -24,11 +25,11 @@ export default function ClickAway(props) {
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
 
-    const handleClick = () => {
+    const handleClick = (e) => {
         setOpen((prev) => !prev);
     };
 
-    const handleClickAway = () => {
+    const handleClickAway = (e) => {
         setOpen(false);
     };
 

@@ -7,43 +7,15 @@ import Typography from '@material-ui/core/Typography';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import Box from '@material-ui/core/Box';
-import PropTypes from 'prop-types';
-import { Button } from '@material-ui/core';
 import Avatar from "@material-ui/core/Avatar";
 import assistant from './images/bigbrain.jpg';
 
 import './App.css';
 
-import TruthValueAnswerComponent from "./components/TruthValueAnswerComponent";
 import Term from "./components/Term";
+import TabPanel from "./components/TabPanel";
+import KeyInfo from "./components/KeyInfo";
 
-
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-      <div
-          role="tabpanel"
-          hidden={value !== index}
-          id={`nav-tabpanel-${index}`}
-          aria-labelledby={`nav-tab-${index}`}
-          {...other}
-      >
-        {value === index && (
-            <Box p={3}>
-              <Typography>{children}</Typography>
-            </Box>
-        )}
-      </div>
-  );
-}
-
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
-};
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -86,25 +58,34 @@ function App() {
           </Tabs>
         </AppBar>
         <TabPanel value={value} index={0}>
-          <header className="App-header">
-            <Typography variant="h4" align="center" gutterBottom>
+          <header className="rowHeader">
+            <Typography variant="h4" gutterBottom>
               Hi, I am your Assistant!
             </Typography>
-            <div className={classes.root2} style={{position: 'absolute', left: '62%', top: '8%'}}>
+            <div className={classes.root2}>
               <Avatar alt="Assistant" src={assistant} className={classes.large}/>
             </div>
-            <div>
+          </header>
+            <div className='rowC'>
             <Typography variant="body1" gutterBottom>
-              Before we start, make sure you know the following:
+              Before we start, make sure you know the following:<span>&nbsp;&nbsp;&nbsp;</span>
             </Typography>
-            <Term title="agent" explanation="A subject who has a certain perspective on the situation in the puzzle - often a person."/>
-            <Term title="affair" explanation="A state which can be true or false - the main facts in the puzzle."/>
-              <Term title="difference between knowledge and common knowledge" explanation="Knowledge is to be aware of piece of information by your own.
+            <Term title="agent" explanation="An agent is a subject who has a certain perspective on the situation in the puzzle - often a person."/>
+              <span>&nbsp;&nbsp;&nbsp;</span>
+            <Term title="affair" explanation="An affair is a state which can be true or false - the main facts in the puzzle."/>
+              <span>&nbsp;&nbsp;&nbsp;</span>
+              <Term title="knowledge/common knowledge" explanation="Knowledge is when an agent is aware of piece of information by his own.
               Common knowledge is when all agents are aware that all agents in the puzzle know something. "/>
             </div>
-          </header>
-          <TruthValueAnswerComponent />
-          <Button variant="contained" color="primary">Hello World</Button>
+          <br/>
+          <Typography variant="h5" color="secondary" gutterBottom>
+            Let's puzzle our brains!
+          </Typography>
+          <hr style={{color: '#4141D8', backgroundColor: '#4141D8',height: 5}}/>
+          <br/>
+          <KeyInfo info={"agent"}/>
+          <br/>
+          <KeyInfo info={"affair"}/>
         </TabPanel>
         <TabPanel value={value} index={1}>
           Page Two
