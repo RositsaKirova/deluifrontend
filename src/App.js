@@ -14,7 +14,7 @@ import './App.css';
 
 import Term from "./components/Term";
 import TabPanel from "./components/TabPanel";
-import KeyInfo from "./components/KeyInfo";
+import PuzzleBuilder from "./components/PuzzleBuilder";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -83,9 +83,7 @@ function App() {
           </Typography>
           <hr style={{color: '#4141D8', backgroundColor: '#4141D8',height: 5}}/>
           <br/>
-          <KeyInfo info={"agent"}/>
-          <br/>
-          <KeyInfo info={"affair"}/>
+          <PuzzleBuilder />
         </TabPanel>
         <TabPanel value={value} index={1}>
           Page Two

@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
 import '../App.css';
 import Typography from "@material-ui/core/Typography";
+import Snackbar from "@material-ui/core/Snackbar";
+import MuiAlert from '@material-ui/lab/Alert';
+
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 class KeyInfo extends React.Component {
     constructor(props) {
@@ -9,8 +15,15 @@ class KeyInfo extends React.Component {
             elements: [],
             elementsNames: [],
             rename: false,
-            buttonName: 'Rename ' + this.props.info + 's'
+            buttonName: 'Rename ' + this.props.info + 's',
+            duplicateMessage: false,
+            numberMessage: false
         };
+        this.handleClose = this.handleClose.bind(this);
+    }
+
+    sendData = (theData, numberOfElements, elementChanged) => {
+        this.props.elementsCallback(theData, numberOfElements, elementChanged);
     }
 
     numberHandler = (number) => {
@@ -24,22 +37,44 @@ class KeyInfo extends React.Component {
         for (let i = 1; i <= number; i++) {
             tempElements.push(i);
             if(i > newNames.length){
-                newNames.push(i);
+                newNames.push(i.toString());
             }
         }
         this.setState({
             elements: tempElements.slice(),
             elementsNames: newNames
         });
+
+        this.sendData(newNames, number, -1);
     }
 
+    //can't be duplicate
+    //can't be a number
     namesHandler(elementNumber, name){
-        if(name) {
-            let newNames = this.state.elementsNames.slice();
-            newNames[elementNumber] = name;
-            this.setState({
-                elementsNames: newNames
-            });
+        this.setState({
+            numberMessage: false,
+            duplicateMessage: false
+        });
+        if(name){
+            if(this.state.elementsNames.some(item => name === item)){
+                this.setState({
+                    numberMessage: false,
+                    duplicateMessage: true
+                });
+            } else if(!isNaN(name)){
+                this.setState({
+                    duplicateMessage: false,
+                    numberMessage: true
+                });
+            } else {
+                let newNames = this.state.elementsNames.slice();
+                newNames[elementNumber] = name;
+                this.setState({
+                    elementsNames: newNames
+                });
+
+                this.sendData(newNames, -1, elementNumber);
+            }
         }
     }
 
@@ -55,6 +90,13 @@ class KeyInfo extends React.Component {
                 buttonName: 'Ready renaming'
             });
         }
+    }
+
+    handleClose() {
+        this.setState({
+            duplicateMessage: false,
+            numberMessage: false
+        })
     }
 
     render() {
@@ -83,6 +125,16 @@ class KeyInfo extends React.Component {
                                 placeholder="Please provide a name"
                                 onChange={e => this.namesHandler(item - 1, e.target.value)}
                             />
+                            <Snackbar open={this.state.duplicateMessage} autoHideDuration={3000} onClose={this.handleClose}>
+                                <Alert onClose={this.handleClose} severity="error">
+                                    No duplicates of names are allowed!
+                                </Alert>
+                            </Snackbar>
+                            <Snackbar open={this.state.numberMessage} autoHideDuration={3000} onClose={this.handleClose}>
+                                <Alert onClose={this.handleClose} severity="error">
+                                    Names cannot be numbers!
+                                </Alert>
+                            </Snackbar>
                         </li>
                     ))}
                 </ul>}
