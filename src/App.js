@@ -86,7 +86,7 @@ function App() {
           <PuzzleBuilder />
         </TabPanel>
         <TabPanel value={value} index={1}>
-          Page Two
+          Page Two...
         </TabPanel>
       </div>
       </React.Fragment>
