@@ -18,7 +18,9 @@ class PuzzleBuilder extends React.Component {
             combinationsTruthValues: [],
             finished: [],
             combinations: '',
-            affair: "Select an affair"
+            affair: "Select an affair",
+            testVariable1: true,
+            testVariable2: true
         };
         this.addAffair = this.addAffair.bind(this);
     }
