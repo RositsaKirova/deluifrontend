@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import KeyInfo from "./KeyInfo";
 import Typography from "@material-ui/core/Typography";
 import Select from '@material-ui/core/Select';
