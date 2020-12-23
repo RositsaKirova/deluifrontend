@@ -12,6 +12,7 @@ class KeyInfo extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            number: 0,
             elements: [],
             elementsNames: [],
             rename: false,
@@ -27,6 +28,12 @@ class KeyInfo extends React.Component {
     }
 
     numberHandler = (number) => {
+        if(number < 0){
+            number = 0;
+        }
+        if(number > 100){
+            number = 100;
+        }
         let tempElements = [];
         let newNames = this.state.elementsNames.slice();
 
@@ -41,6 +48,7 @@ class KeyInfo extends React.Component {
             }
         }
         this.setState({
+            number: number,
             elements: tempElements.slice(),
             elementsNames: newNames
         });
@@ -108,9 +116,10 @@ class KeyInfo extends React.Component {
                     </Typography>
                 <input
                     type='number'
+                    value = {this.state.number}
                     placeholder={0}
                     min={0}
-                    max={1000}
+                    max={100}
                     onChange={e => this.numberHandler(e.target.value)}
                 />
             </div>
@@ -123,6 +132,7 @@ class KeyInfo extends React.Component {
                             <input
                                 type='text'
                                 placeholder="Please provide a name"
+                                maxLength={20}
                                 onChange={e => this.namesHandler(item - 1, e.target.value)}
                             />
                             <Snackbar open={this.state.duplicateMessage} autoHideDuration={3000} onClose={this.handleClose}>
