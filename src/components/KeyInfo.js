@@ -1,8 +1,28 @@
 import React from 'react';
+import { connect } from "react-redux";
+import { bindActionCreators } from 'redux';
+import { removeElements, addElements, renameElements } from "../actions/index";
 import '../App.css';
 import Typography from "@material-ui/core/Typography";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from '@material-ui/lab/Alert';
+
+const WAIT_INTERVAL = 3000;
+
+const mapDispatchToProps = (dispatch) => {
+    return bindActionCreators({
+        removeElements: elements => removeElements(elements),
+        addElements: elements => addElements(elements),
+        renameElements: element => renameElements(element)
+    }, dispatch);
+}
+
+const mapStateToProps = (state) => {
+    return {
+        agents: state.agents,
+        affairs:state.affairs
+    }
+}
 
 function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -12,10 +32,8 @@ class KeyInfo extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            number: 0,
-            elements: [],
-            elementsNames: [],
             rename: false,
+            elements: [],
             buttonName: 'Rename ' + this.props.info + 's',
             duplicateMessage: false,
             numberMessage: false
@@ -23,8 +41,8 @@ class KeyInfo extends React.Component {
         this.handleClose = this.handleClose.bind(this);
     }
 
-    sendData = (theData, numberOfElements, elementChanged) => {
-        this.props.elementsCallback(theData, numberOfElements, elementChanged);
+    componentDidMount() {
+        this.timer = null;
     }
 
     numberHandler = (number) => {
@@ -34,54 +52,50 @@ class KeyInfo extends React.Component {
         if(number > 100){
             number = 100;
         }
-        let tempElements = [];
-        let newNames = this.state.elementsNames.slice();
 
-        if(number < newNames.length){
-            newNames = this.state.elementsNames.slice(0,number);
+        let elements;
+        if(this.props.info === "agent"){
+            elements = this.props.agents;
+        } else{
+            elements = this.props.affairs;
         }
-
-        for (let i = 1; i <= number; i++) {
-            tempElements.push(i);
-            if(i > newNames.length){
-                newNames.push(i.toString());
-            }
+        if(number < elements.length){
+            this.props.removeElements([this.props.info, number]);
+        } else {
+            this.props.addElements([this.props.info, number]);
         }
-        this.setState({
-            number: number,
-            elements: tempElements.slice(),
-            elementsNames: newNames
-        });
-
-        this.sendData(newNames, number, -1);
     }
 
-    //can't be duplicate
-    //can't be a number
-    namesHandler(elementNumber, name){
+    namesHandler(flag, elementNumber, name) {
+        clearTimeout(this.timer);
         this.setState({
             numberMessage: false,
             duplicateMessage: false
         });
-        if(name){
-            if(this.state.elementsNames.some(item => name === item)){
+        if (name) {
+            let elements;
+            if (this.props.info === "agent") {
+                elements = this.props.agents;
+            } else {
+                elements = this.props.affairs;
+            }
+            if (elements.some(item => name === item)) {
                 this.setState({
                     numberMessage: false,
                     duplicateMessage: true
                 });
-            } else if(!isNaN(name)){
+            } else if (!isNaN(name)) {
                 this.setState({
                     duplicateMessage: false,
                     numberMessage: true
                 });
             } else {
-                let newNames = this.state.elementsNames.slice();
-                newNames[elementNumber] = name;
-                this.setState({
-                    elementsNames: newNames
-                });
-
-                this.sendData(newNames, -1, elementNumber);
+                console.log(flag);
+                if (flag) {
+                    this.props.renameElements([this.props.info, elementNumber, name]);
+                } else {
+                    this.timer = setTimeout(() => this.props.renameElements([this.props.info, elementNumber, name]), WAIT_INTERVAL);
+                }
             }
         }
     }
@@ -108,6 +122,12 @@ class KeyInfo extends React.Component {
     }
 
     render() {
+        let elements;
+        if(this.props.info === "agent"){
+            elements = this.props.agents;
+        } else{
+            elements = this.props.affairs;
+        }
         return (
             <div>
             <div className='rowC'>
@@ -116,7 +136,7 @@ class KeyInfo extends React.Component {
                     </Typography>
                 <input
                     type='number'
-                    value = {this.state.number}
+                    value = {elements.length}
                     placeholder={0}
                     min={0}
                     max={100}
@@ -124,16 +144,18 @@ class KeyInfo extends React.Component {
                 />
             </div>
                 <Typography variant="body1" gutterBottom>
-                    {this.state.elements.length} {this.props.info}(s) <button onClick={() => this.allowORfinishRename()}>{this.state.buttonName}</button>
+                    {elements.length} {this.props.info}(s) <button onClick={() => this.allowORfinishRename()}>{this.state.buttonName}</button>
                 </Typography>
                 {this.state.rename && <ul>
-                    {this.state.elements.map(item => (
-                        <li key={item}>{this.props.info} {this.state.elementsNames[item-1]} -> Rename it :
+                    {elements.map((item, index) => (
+                        <li key={item}>{this.props.info} "{item}" -> Rename it :
                             <input
                                 type='text'
                                 placeholder="Please provide a name"
-                                maxLength={20}
-                                onChange={e => this.namesHandler(item - 1, e.target.value)}
+                                maxLength={30}
+                                onKeyPress={(e) =>
+                                    (e.key === 'Enter' ? this.namesHandler(true, index, e.target.value) : null)}
+                                onChange={e => this.namesHandler(false, index, e.target.value)}
                             />
                             <Snackbar open={this.state.duplicateMessage} autoHideDuration={3000} onClose={this.handleClose}>
                                 <Alert onClose={this.handleClose} severity="error">
@@ -153,4 +175,4 @@ class KeyInfo extends React.Component {
     }
 }
 
-export default KeyInfo
+export default connect(mapStateToProps, mapDispatchToProps)(KeyInfo);
