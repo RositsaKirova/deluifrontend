@@ -17,7 +17,9 @@ import MuiAlert from '@material-ui/lab/Alert';
 import '../App.css';
 import {withStyles} from '@material-ui/core/styles';
 import Switch from '@material-ui/core/Switch';
+import Term from "./Term";
 import {
+    Button,
     Grid,
     Paper,
     Popover,
@@ -31,6 +33,7 @@ import {
 import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
 import AssignmentTurnedInTwoToneIcon from '@material-ui/icons/AssignmentTurnedInTwoTone';
 import HelpIcon from '@material-ui/icons/Help';
+import TabPanel from "./TabPanel";
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators({
@@ -49,7 +52,8 @@ const mapStateToProps = (state) => {
         encoded: state.encoded,
         truthValues: state.truthValues,
         submitted: state.submitted,
-        question: state.question
+        question: state.question,
+        indexQuestion: state.statements.indexOf(state.question[0])
     }
 }
 
@@ -97,6 +101,8 @@ class PuzzleBuilder extends React.Component {
         this.state = {
             alreadyAdded: false,
             sameBothSides: false,
+            noSStatements: false,
+            noQ: false,
             anchorEl: null,
             anchorEl2: null,
             anchorEl3: null,
@@ -127,7 +133,6 @@ class PuzzleBuilder extends React.Component {
             comb = "false" + comb;
         }
         this.props.changeTruthValue([index, comb, combEncoded, event]);
-        console.log("tv: " + this.props.truthValues);
     }
 
     alreadyAddedHandler = () => {
@@ -142,10 +147,24 @@ class PuzzleBuilder extends React.Component {
         })
     }
 
+    noSubmittedStatements = () => {
+        this.setState({
+            noSStatements: true
+        })
+    }
+
+    noQuestion = () => {
+        this.setState({
+            noQ: true
+        })
+    }
+
     handleClose() {
         this.setState({
             alreadyAdded: false,
-            sameBothSides: false
+            sameBothSides: false,
+            noSStatements: false,
+            noQ: false
         })
     }
 
@@ -248,16 +267,27 @@ class PuzzleBuilder extends React.Component {
         this.props.removeQuestion();
     }
 
+    submit = () =>{
+        if(!(this.props.submitted.length > 0)){
+            this.noSubmittedStatements();
+        } else if(!(this.props.question.length > 0)){
+            this.noQuestion();
+        } else{
+            alert("Your submitted statement(s) and question were successfully sent to a prover.");
+        }
+    };
+
     render() {
         const { classes } = this.props;
         return (
             <div>
+                <Term title="HINT" explanation="You must answer the questions to proceed further."/>
                 <div className='rowC'>
-                <KeyInfo info={"agent"} /><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><KeyInfo info={"affair"} />
+                <KeyInfo info={"agent"} /><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><KeyInfo info={"state"} />
                 </div>
                 <br/>
                 <Typography variant="h6" gutterBottom>Templates to use:</Typography>
-                <br/>
+                <Term title="HINT" explanation="You must first add some states."/>
                 <TableContainer component={Paper}>
                     <Table className={classes.table} aria-label="simple table">
                         <TableBody>
@@ -287,10 +317,10 @@ class PuzzleBuilder extends React.Component {
                     <Alert onClose={this.handleClose} severity="warning">You need to select different combinations on the different sides!</Alert>
                 </Snackbar>
                 <div className='rowC'>
-                    <Table className="float-left" style={{ width: "45vw", border: "3px solid rgb(0, 0, 0)"}} aria-label="simple table">
-                        <TableHead>
+                    <Table className="float-left" style={{ width: "46vw", border: "3px solid rgb(0, 0, 0)"}} aria-label="simple table">
+                        <TableHead className={classes.head}>
                             <TableRow>
-                                <TableCell className={classes.cellFontSize}>Statements in progress</TableCell>
+                                <TableCell className={classes.cellHeadFontSize}>Statements in progress</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -308,7 +338,9 @@ class PuzzleBuilder extends React.Component {
                                     </Grid><Grid item>True</Grid>
                                 </Grid>
                             </Typography>}<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><AssignmentTurnedInTwoToneIcon
-                                fontSize="large" color="primary"
+                                fontSize="large"
+                                color="primary"
+                                className= {(index === this.props.indexQuestion) ? classes.hidden : null}
                                 aria-owns={this.state.open ? 'mouse-over-popover' : undefined} aria-haspopup="true"
                                 onMouseEnter={e => this.handlePopoverOpen(1, e)}
                                 onMouseLeave={() => this.handlePopoverClose(1)}
@@ -333,7 +365,7 @@ class PuzzleBuilder extends React.Component {
                                     onClose={() => this.handlePopoverClose(1)}
                                     disableRestoreFocus
                                 >
-                                    <Typography>Click if statement is ready for submission.</Typography>
+                                    <Typography>Submit statement.</Typography>
                                 </Popover>
                             <span>&nbsp;&nbsp;&nbsp;</span><DeleteForeverOutlinedIcon
                             fontSize="large"
@@ -362,12 +394,13 @@ class PuzzleBuilder extends React.Component {
                                     onClose={() => this.handlePopoverClose(2)}
                                     disableRestoreFocus
                                 >
-                                    <Typography>Click if you want to remove this statement.</Typography>
+                                    <Typography>Remove statement.</Typography>
                                 </Popover>
                                     <span>&nbsp;&nbsp;&nbsp;</span><HelpIcon
                                         fontSize="large"
                                         color="primary"
-                                        className= {(this.props.question && this.props.question.length) ? classes.hidden : null}
+                                        className= {((this.props.question && this.props.question.length) || this.props.submitted.indexOf(item) !== -1)
+                                             ? classes.hidden : null}
                                         aria-owns={this.state.open5 ? 'mouse-over-popover' : undefined}
                                         aria-haspopup="true"
                                         onMouseEnter={e => this.handlePopoverOpen(5, e)}
@@ -392,7 +425,7 @@ class PuzzleBuilder extends React.Component {
                                         onClose={() => this.handlePopoverClose(5)}
                                         disableRestoreFocus
                                     >
-                                        <Typography>Click if this is the statement which validity you want to check.</Typography>
+                                        <Typography>Check statement.</Typography>
                                     </Popover>
                                 </div>
                             </TableCell>
@@ -402,10 +435,10 @@ class PuzzleBuilder extends React.Component {
                     </Table>
                     <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                     <div className="float-right">
-                    <Table style={{ width: "45vw", border: "3px solid rgb(0, 0, 0)"}} aria-label="simple table">
-                        <TableHead >
+                    <Table style={{ width: "46vw", border: "3px solid rgb(0, 0, 0)"}} aria-label="simple table">
+                        <TableHead className={classes.head}>
                             <TableRow >
-                                <TableCell className={classes.cellFontSize}>Submitted statements</TableCell>
+                                <TableCell className={classes.cellHeadFontSize}>Submitted statements</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -439,7 +472,7 @@ class PuzzleBuilder extends React.Component {
                                             onClose={() => this.handlePopoverClose(3)}
                                             disableRestoreFocus
                                         >
-                                            <Typography>Click if you want to remove this statement.</Typography>
+                                            <Typography>Remove statement.</Typography>
                                         </Popover>
                                     </TableCell>
                                 </TableRow>
@@ -447,10 +480,10 @@ class PuzzleBuilder extends React.Component {
                         </TableBody>
                     </Table>
                     <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                    <Table className="float-right" style={{ width: "45vw", border: "3px solid rgb(0, 0, 0)"}} aria-label="simple table">
-                        <TableHead >
+                    <Table className="float-right" style={{ width: "46vw", border: "3px solid rgb(0, 0, 0)"}} aria-label="simple table">
+                        <TableHead className={classes.head}>
                             <TableRow >
-                                <TableCell className={classes.cellFontSize}>Your question:</TableCell>
+                                <TableCell className={classes.cellHeadFontSize}>Your question:</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -484,7 +517,7 @@ class PuzzleBuilder extends React.Component {
                                             onClose={() => this.handlePopoverClose(4)}
                                             disableRestoreFocus
                                         >
-                                            <Typography>Click if you want to remove this question.</Typography>
+                                            <Typography>Remove question.</Typography>
                                         </Popover>
                                     </TableCell>
                                 </TableRow>
@@ -493,6 +526,16 @@ class PuzzleBuilder extends React.Component {
                     </Table>
                     </div>
                 </div>
+                <br/><div className="rowC">
+                <Term title="HINT" explanation="Once you click the Send button, your submitted statements and question will be sent to a prover.
+           It will check whether the question statement is true taking into account the submitted statements."/><span>&nbsp;&nbsp;&nbsp;</span>
+                <Button variant="contained" color="primary" onClick={this.submit}>Send</Button></div>
+                <Snackbar open={this.state.noSStatements} autoHideDuration={3000} onClose={this.handleClose}>
+                    <Alert onClose={this.handleClose} severity="error">You must have at least one submitted statement to send!</Alert>
+                </Snackbar>
+                <Snackbar open={this.state.noQ} autoHideDuration={3000} onClose={this.handleClose}>
+                    <Alert onClose={this.handleClose} severity="error">You must have a question to send!</Alert>
+                </Snackbar>
             </div>
         )
     }

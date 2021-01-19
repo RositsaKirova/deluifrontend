@@ -15,6 +15,7 @@ import './App.css';
 import Term from "./components/Term";
 import TabPanel from "./components/TabPanel";
 import PuzzleBuilder from "./components/PuzzleBuilder";
+import {Button} from "@material-ui/core";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -66,17 +67,10 @@ function App() {
               <Avatar alt="Assistant" src={assistant} className={classes.large}/>
             </div>
           </header>
-            <div className='rowC'>
-            <Typography variant="body1" gutterBottom>
-              Before we start, make sure you know the following:<span>&nbsp;&nbsp;&nbsp;</span>
-            </Typography>
-            <Term title="agent" explanation="An agent is a subject who has a certain perspective on the situation in the puzzle - often a person."/>
-              <span>&nbsp;&nbsp;&nbsp;</span>
-            <Term title="affair" explanation="An affair is a state which can be true or false - the main facts in the puzzle."/>
-              <span>&nbsp;&nbsp;&nbsp;</span>
-              <Term title="knowledge/common knowledge" explanation="Knowledge is when an agent is aware of piece of information by his own.
-              Common knowledge is when all agents are aware that all agents in the puzzle know something. "/>
-            </div>
+          <Typography variant="body1" gutterBottom>
+            Check out the EXAMPLE section to see how to fill in the form and read explanations about terminology.
+            You can switch between the two tabs without losing your input.
+          </Typography>
           <br/>
           <Typography variant="h5" color="secondary" gutterBottom>
             Let's puzzle our brains!

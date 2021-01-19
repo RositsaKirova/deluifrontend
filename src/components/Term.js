@@ -19,6 +19,10 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(1),
         backgroundColor: theme.palette.background.paper,
     },
+    b: {
+        backgroundColor: theme.palette.common.black,
+        color: theme.palette.common.white
+    }
 }));
 
 export default function ClickAway(props) {
@@ -36,7 +40,7 @@ export default function ClickAway(props) {
     return (
         <ClickAwayListener onClickAway={handleClickAway}>
             <div className={classes.root}>
-                <button type="button" onClick={handleClick}>
+                <button type="button" className={classes.b} onClick={handleClick}>
                     {props.title}
                 </button>
                 {open ? (

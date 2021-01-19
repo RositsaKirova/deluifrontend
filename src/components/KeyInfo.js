@@ -7,8 +7,6 @@ import Typography from "@material-ui/core/Typography";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from '@material-ui/lab/Alert';
 
-const WAIT_INTERVAL = 3000;
-
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators({
         removeElements: elements => removeElements(elements),
@@ -26,6 +24,14 @@ const mapStateToProps = (state) => {
 
 function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
+function removePreZero(number) {
+    if(number === 0){
+        return 0;
+    } else{
+        return number.toString().replace(/^0+/, '');
+    }
 }
 
 class KeyInfo extends React.Component {
@@ -66,7 +72,7 @@ class KeyInfo extends React.Component {
         }
     }
 
-    namesHandler(flag, elementNumber, name) {
+    namesHandler(elementNumber, name) {
         clearTimeout(this.timer);
         this.setState({
             numberMessage: false,
@@ -90,12 +96,7 @@ class KeyInfo extends React.Component {
                     numberMessage: true
                 });
             } else {
-                console.log(flag);
-                if (flag) {
-                    this.props.renameElements([this.props.info, elementNumber, name]);
-                } else {
-                    this.timer = setTimeout(() => this.props.renameElements([this.props.info, elementNumber, name]), WAIT_INTERVAL);
-                }
+                this.props.renameElements([this.props.info, elementNumber, name]);
             }
         }
     }
@@ -136,8 +137,7 @@ class KeyInfo extends React.Component {
                     </Typography>
                 <input
                     type='number'
-                    value = {elements.length}
-                    placeholder={0}
+                    value = {removePreZero(elements.length)}
                     min={0}
                     max={100}
                     onChange={e => this.numberHandler(e.target.value)}
@@ -154,8 +154,7 @@ class KeyInfo extends React.Component {
                                 placeholder="Please provide a name"
                                 maxLength={30}
                                 onKeyPress={(e) =>
-                                    (e.key === 'Enter' ? this.namesHandler(true, index, e.target.value) : null)}
-                                onChange={e => this.namesHandler(false, index, e.target.value)}
+                                    (e.key === 'Enter' ? this.namesHandler(index, e.target.value) : null)}
                             />
                             <Snackbar open={this.state.duplicateMessage} autoHideDuration={3000} onClose={this.handleClose}>
                                 <Alert onClose={this.handleClose} severity="error">

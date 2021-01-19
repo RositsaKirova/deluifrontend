@@ -14,6 +14,13 @@ const styles = theme => ({
     table: {
         width: '90vw',
     },
+    head: {
+        backgroundColor: theme.palette.common.black
+    },
+    cellHeadFontSize: {
+        fontSize: '13pt',
+        color: theme.palette.common.white
+    },
     cellFontSize: {
         fontSize: '13pt'
     },

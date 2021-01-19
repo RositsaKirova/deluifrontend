@@ -36,15 +36,15 @@ class AddAffair extends React.Component {
     };
 
     addAffair() {
-        if (!(this.props.affair === "Select an affair")) {
+        if (!(this.props.affair === "Select a state")) {
             console.log("enc: " + this.props.statements);
             let newAffairEncoded = 'a' + this.props.affair;
-            let cE = "true: affair(" + this.props.affairs[this.props.affair - 1] + ")";
-            let cE2 = "false: affair(" + this.props.affairs[this.props.affair - 1] + ")";
+            let cE = "true: state(" + this.props.affairs[this.props.affair - 1] + ")";
+            let cE2 = "false: state(" + this.props.affairs[this.props.affair - 1] + ")";
             if (this.props.statements.indexOf(cE) === -1 && this.props.statements.indexOf(cE2) === -1) {
                 console.log("encInProcess: " + this.props.statements);
                 this.props.addStatement([cE, newAffairEncoded]);
-                this.props.changeAffair("Select an affair");
+                this.props.changeAffair("Select a state");
             } else {
                 this.props.setAlreadyAddedHandler();
             }
@@ -61,7 +61,7 @@ class AddAffair extends React.Component {
                     onChange={e => this.handleAffairChange(e.target.value)}
                     className={classes.select}
                 >
-                    <option value="Select an affair" disabled>Select an affair</option>
+                    <option value="Select a state" disabled>Select a state</option>
                     {this.props.affairs.map((item, index) => (
                         <option value={index + 1}>{item}</option>))}
                 </Select>

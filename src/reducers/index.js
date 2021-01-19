@@ -15,7 +15,7 @@ const initialState = {
     questionEncoded: '',
     agent: ["agent(s)"],
     agent2: ["agent(s)"],
-    affair: "Select an affair",
+    affair: "Select a state",
     leftAnd: "Select a statement",
     rightAnd: "Select a statement",
     leftOr: "Select a statement",
@@ -55,7 +55,7 @@ function rootReducer(state = initialState, action) {
                 element = 'a';
                 stop = state.affairs.slice();
                 if(number < affairNumber){
-                    affairNumber = "Select an affair";
+                    affairNumber = "Select a state";
                 }
             }
 
@@ -249,15 +249,15 @@ function rootReducer(state = initialState, action) {
                 nameBefore = elements[index];
 
                 for (let i = 0; i < combInProcess.length; i++) {
-                    while(combInProcess[i].includes('affair(' + nameBefore + ")")){
-                        let newString = combInProcess[i].replace("affair(" + nameBefore + ")", "affair(" + nameAfter + ")");
+                    while(combInProcess[i].includes('state(' + nameBefore + ")")){
+                        let newString = combInProcess[i].replace("state(" + nameBefore + ")", "state(" + nameAfter + ")");
                         combInProcess[i] = newString;
                     }
                 }
 
                 for (let i = 0; i < combSubmitted.length; i++) {
-                    while(combSubmitted[i].includes('affair(' + nameBefore + ")")){
-                        let newString = combSubmitted[i].replace("affair(" + nameBefore + ")", "affair(" + nameAfter + ")");
+                    while(combSubmitted[i].includes('state(' + nameBefore + ")")){
+                        let newString = combSubmitted[i].replace("state(" + nameBefore + ")", "state(" + nameAfter + ")");
                         combSubmitted[i] = newString;
                     }
                 }
@@ -356,11 +356,11 @@ function rootReducer(state = initialState, action) {
         }
         case CHANGE_TRUTH_VALUE: {
             let index = action.payload[0];
-            let statements = state.statements;
+            let statements = state.statements.slice();
             statements[index] = action.payload[1];
-            let encoded = state.encoded;
+            let encoded = state.encoded.slice();
             encoded[index] = action.payload[2];
-            let truthValues = state.truthValues;
+            let truthValues = state.truthValues.slice();
             truthValues[index] = action.payload[3];
             return Object.assign({}, state, {
                 statements: statements,
