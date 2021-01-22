@@ -95,7 +95,7 @@ function Example() {
                 <li><Typography variant="body1" gutterBottom>Prisoner 1 and 2 know whether prisoner 3 has a blue hat or not.<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>That is because they see it and that is a justification.</Typography></li>
                 <li><Typography variant="body1" gutterBottom>Prisoner 2 and 3 know whether prisoner 1 has a blue hat or not.</Typography></li>
                 <li><Typography variant="body1" gutterBottom>Prisoner 1 and 3 know whether prisoner 2 has a blue hat or not.</Typography></li>
-                <li><Typography variant="body1" gutterBottom>All of the above statements are common knowledge.</Typography></li>
+                <li><Typography variant="body1" gutterBottom>All of the above statements are common knowledge.<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>It is very important to say which statements are common knowledge as your Assistant cannot just assume that.</Typography></li>
             </ol>
             <Typography variant="body1" gutterBottom>Except for number 7, the numbers of the above statements correspond to the numbers of the submitted statements in the filled form below.</Typography>
             <Typography variant="h5" color="secondary" gutterBottom>Filled input form</Typography>
