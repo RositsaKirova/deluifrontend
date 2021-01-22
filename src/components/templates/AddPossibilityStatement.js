@@ -2,7 +2,6 @@ import Select from "@material-ui/core/Select";
 import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 import React from "react";
 import styles from "../stylesComponents";
-import MenuProps from "../stylesComponents";
 import {bindActionCreators} from "redux";
 import {addStatement, changeAgentsWithPossibleKnowledge, changePossibleKnowledge} from "../../actions";
 import {withStyles} from "@material-ui/core/styles";
@@ -10,6 +9,17 @@ import {connect} from "react-redux";
 import MenuItem from "@material-ui/core/MenuItem";
 import Checkbox from "@material-ui/core/Checkbox";
 import ListItemText from "@material-ui/core/ListItemText";
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            width: 250,
+        },
+    },
+};
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators({
