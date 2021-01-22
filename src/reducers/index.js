@@ -11,6 +11,7 @@ const initialState = {
     truthValues: [],
     submitted: [],
     submittedEncoded: [],
+    cksubmitted: [],
     question: [],
     questionEncoded: '',
     agent: ["agent(s)"],
@@ -23,7 +24,6 @@ const initialState = {
     leftThen: "Select a statement",
     rightThen: "Select a statement",
     knows: "Select a statement",
-    cknowledge: "Select a statement",
     pknowledge: "Select a statement"
 };
 
@@ -141,9 +141,12 @@ function rootReducer(state = initialState, action) {
             submitted.splice(index, 1);
             let submittedEncoded = state.submittedEncoded.slice();
             submittedEncoded.splice(index, 1);
+            let cksubmitted = state.cksubmitted.slice();
+            cksubmitted.splice(index, 1);
             return Object.assign({}, state, {
                 submitted: submitted,
-                submittedEncoded: submittedEncoded
+                submittedEncoded: submittedEncoded,
+                cksubmitted: cksubmitted
             });
         }
         case REMOVE_QUESTION: {
@@ -291,7 +294,8 @@ function rootReducer(state = initialState, action) {
         case ADD_SUBMITTED: {
             return Object.assign({}, state, {
                 submitted: state.submitted.slice().concat(action.payload[0]),
-                submittedEncoded: state.submittedEncoded.slice().concat(action.payload[1])
+                submittedEncoded: state.submittedEncoded.slice().concat(action.payload[1]),
+                cksubmitted: state.cksubmitted.slice().concat(false)
             });
         }
         case CHANGE_AFFAIR: {
@@ -350,8 +354,11 @@ function rootReducer(state = initialState, action) {
             });
         }
         case CHANGE_COMMON_KNOWLEDGE: {
+            console.log(state.cksubmitted);
+            let values = state.cksubmitted.slice();
+            values[action.payload[0]] = action.payload[1];
             return Object.assign({}, state, {
-                cknowledge: action.payload
+                cksubmitted: values
             });
         }
         case CHANGE_TRUTH_VALUE: {

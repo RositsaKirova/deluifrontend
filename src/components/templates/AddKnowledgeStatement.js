@@ -101,8 +101,8 @@ class AddKnowledgeStatement extends React.Component {
                     className={classes.select}
                 >
                     <option value="Select a statement" disabled>Select a statement</option>
-                    {this.props.statements.filter(name => !name.includes('common knowledge')).map((item, index) => (
-                        <option value={index} className={(this.props.truthValues[this.props.statements.indexOf(item)] ? null : classes.redText)}>{item}</option>))}
+                    {this.props.statements.map((item, index) => (
+                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)}>{item}</option>))}
                 </Select>
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <AddCircleRoundedIcon

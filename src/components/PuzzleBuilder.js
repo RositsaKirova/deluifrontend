@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from "./stylesComponents";
 import {bindActionCreators} from "redux";
-import {changeTruthValue, addSubmitted, removeStatement, removeSubmitted, removeQuestion, changeQuestion} from "../actions";
+import {changeTruthValue, changeCommonKnowledge, addSubmitted, removeStatement, removeSubmitted, removeQuestion, changeQuestion} from "../actions";
 import {connect} from "react-redux";
 import KeyInfo from "./KeyInfo";
 import AddAffair from "./templates/AddAffair";
@@ -10,13 +10,14 @@ import AddOrStatement from "./templates/AddOrStatement";
 import AddIfThenStatement from "./templates/AddIfThenStatement";
 import AddPossibilityStatement from "./templates/AddPossibilityStatement";
 import AddKnowledgeStatement from "./templates/AddKnowledgeStatement";
-import AddCommonKnowledgeStatement from "./templates/AddCommonKnowledgeStatement";
 import Typography from "@material-ui/core/Typography";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert from '@material-ui/lab/Alert';
 import '../App.css';
 import {withStyles} from '@material-ui/core/styles';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import AntSwitch from './AntSwitch'
 import Term from "./Term";
 import {
     Button,
@@ -33,11 +34,11 @@ import {
 import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
 import AssignmentTurnedInTwoToneIcon from '@material-ui/icons/AssignmentTurnedInTwoTone';
 import HelpIcon from '@material-ui/icons/Help';
-import TabPanel from "./TabPanel";
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators({
         changeTruthValue: statement => changeTruthValue(statement),
+        changeCommonKnowledge: statement => changeCommonKnowledge(statement),
         addSubmitted: statement => addSubmitted(statement),
         removeStatement: statement => removeStatement(statement),
         removeSubmitted: statement => removeSubmitted(statement),
@@ -52,44 +53,11 @@ const mapStateToProps = (state) => {
         encoded: state.encoded,
         truthValues: state.truthValues,
         submitted: state.submitted,
+        cksubmitted: state.cksubmitted,
         question: state.question,
         indexQuestion: state.statements.indexOf(state.question[0])
     }
 }
-
-const AntSwitch = withStyles((theme) => ({
-    root: {
-        width: 28,
-        height: 16,
-        padding: 0,
-        display: 'flex',
-    },
-    switchBase: {
-        padding: 2,
-        color: theme.palette.grey[500],
-        '&$checked': {
-            transform: 'translateX(12px)',
-            color: theme.palette.common.white,
-            '& + $track': {
-                opacity: 1,
-                backgroundColor: theme.palette.primary.main,
-                borderColor: theme.palette.primary.main,
-            },
-        },
-    },
-    thumb: {
-        width: 12,
-        height: 12,
-        boxShadow: 'none',
-    },
-    track: {
-        border: `1px solid ${theme.palette.grey[500]}`,
-        borderRadius: 16 / 2,
-        opacity: 1,
-        backgroundColor: theme.palette.common.white,
-    },
-    checked: {},
-}))(Switch);
 
 function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -133,6 +101,10 @@ class PuzzleBuilder extends React.Component {
             comb = "false" + comb;
         }
         this.props.changeTruthValue([index, comb, combEncoded, event]);
+    }
+
+    handleCKswitch = (event, index) => {
+        this.props.changeCommonKnowledge([index, event]);
     }
 
     alreadyAddedHandler = () => {
@@ -235,11 +207,7 @@ class PuzzleBuilder extends React.Component {
     };
 
     addToFinished(index){
-        if(this.props.submitted.indexOf(this.props.statements[index]) === -1){
-            this.props.addSubmitted([this.props.statements[index], this.props.encoded[index]])
-        } else {
-            this.alreadyAddedHandler();
-        }
+        this.props.addSubmitted([this.props.statements[index], this.props.encoded[index]]);
     }
 
     setQuestion(index){
@@ -287,24 +255,24 @@ class PuzzleBuilder extends React.Component {
                 </div>
                 <br/>
                 <Typography variant="h6" gutterBottom>Templates to use:</Typography>
-                <Term title="HINT" explanation="You must first add some states."/>
+                <div className="rowC">
+                    <Term title="HINT" explanation="You must first add some states. Those will turn into statements. Then use the rest of the templates."/><span>&nbsp;&nbsp;&nbsp;</span>
+                    <Term title="another HINT" explanation="No template for common knowledge available. Later on, you can set your submitted statements to be common knowledge."/>
+                </div><br/>
                 <TableContainer component={Paper}>
                     <Table className={classes.table} aria-label="simple table">
                         <TableBody>
                             <TableRow>
                                 <TableCell align="left"> <AddAffair setAlreadyAddedHandler={this.alreadyAddedHandler} /></TableCell>
-                                <TableCell align="left"><AddPossibilityStatement setAlreadyAddedHandler={this.alreadyAddedHandler}/></TableCell>
+                                <TableCell align="left"><AddIfThenStatement setAlreadyAddedHandler={this.alreadyAddedHandler} setsameBothSidesHandler={this.sameBothSidesHandler}/></TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell align="left"><AddAndStatement setAlreadyAddedHandler={this.alreadyAddedHandler} setsameBothSidesHandler={this.sameBothSidesHandler}/></TableCell>
-                                <TableCell align="left"><AddKnowledgeStatement setAlreadyAddedHandler={this.alreadyAddedHandler}/></TableCell>
+                                <TableCell align="left"><AddPossibilityStatement setAlreadyAddedHandler={this.alreadyAddedHandler}/></TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell align="left"><AddOrStatement setAlreadyAddedHandler={this.alreadyAddedHandler} setsameBothSidesHandler={this.sameBothSidesHandler}/></TableCell>
-                                <TableCell align="left"><AddCommonKnowledgeStatement setAlreadyAddedHandler={this.alreadyAddedHandler}/></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell align="left"><AddIfThenStatement setAlreadyAddedHandler={this.alreadyAddedHandler} setsameBothSidesHandler={this.sameBothSidesHandler}/></TableCell>
+                                <TableCell align="left"><AddKnowledgeStatement setAlreadyAddedHandler={this.alreadyAddedHandler}/></TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
@@ -316,6 +284,10 @@ class PuzzleBuilder extends React.Component {
                 <Snackbar open={this.state.sameBothSides} autoHideDuration={3000} onClose={this.handleClose}>
                     <Alert onClose={this.handleClose} severity="warning">You need to select different combinations on the different sides!</Alert>
                 </Snackbar>
+                <div className="rowC">
+                    <Term title="HINT" explanation="A statement in 'Statements in progress' could be any statement. A statement in 'Submitted statements' should be explaining a piece of information from the puzzle you want to solve."/><span>&nbsp;&nbsp;&nbsp;</span>
+                    <Term title="another HINT" explanation="A statement can't be a submitted statement and a question in the same time."/>
+                </div><br/>
                 <div className='rowC'>
                     <Table className="float-left" style={{ width: "46vw", border: "3px solid rgb(0, 0, 0)"}} aria-label="simple table">
                         <TableHead className={classes.head}>
@@ -329,18 +301,18 @@ class PuzzleBuilder extends React.Component {
                             <TableCell className={classes.cellFontSize} align="left">
                                 <div className='rowC'>
                                     <span className={(this.props.truthValues[index] ? null : classes.redText)}>{index + 1}. {item}</span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                                    {(this.props.statements[index].includes("It is common knowledge that ") ||
-                                        this.props.statements[index].includes(" it is possible that "))
+                                    {(this.props.statements[index].includes(" it is possible that "))
                                         ? null : <Typography component="div">
                                 <Grid component="label" container alignItems="center" spacing={1}>
                                     <Grid item>False</Grid><Grid item>
-                                        <AntSwitch checked={this.props.truthValues[index]} onChange={e => this.handleChange(e.target.checked, index)} name="checkedC" />
+                                        <AntSwitch checked={this.props.truthValues[index]} onChange={e => this.handleChange(e.target.checked, index)}/>
                                     </Grid><Grid item>True</Grid>
                                 </Grid>
                             </Typography>}<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><AssignmentTurnedInTwoToneIcon
                                 fontSize="large"
                                 color="primary"
-                                className= {(index === this.props.indexQuestion) ? classes.hidden : null}
+                                className= {(index === this.props.indexQuestion || this.props.submitted.indexOf(item) !== -1) ?
+                                    classes.hidden : null}
                                 aria-owns={this.state.open ? 'mouse-over-popover' : undefined} aria-haspopup="true"
                                 onMouseEnter={e => this.handlePopoverOpen(1, e)}
                                 onMouseLeave={() => this.handlePopoverClose(1)}
@@ -445,7 +417,12 @@ class PuzzleBuilder extends React.Component {
                             {this.props.submitted.map((item, index) => (
                                 <TableRow>
                                     <TableCell className={classes.cellFontSize} align="left">
-                                        {index + 1}. {item} <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><DeleteForeverOutlinedIcon
+                                        {index + 1}. {item} <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                        <FormControlLabel
+                                            control={<Switch checked={this.props.cksubmitted[index]} onChange={e => this.handleCKswitch(e.target.checked, index)}/>}
+                                            label="is common knowledge"
+                                        />
+                                        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><DeleteForeverOutlinedIcon
                                         fontSize="large"
                                         color="primary"
                                         aria-owns={this.state.open3 ? 'mouse-over-popover' : undefined}
@@ -526,10 +503,10 @@ class PuzzleBuilder extends React.Component {
                     </Table>
                     </div>
                 </div>
-                <br/><div className="rowC">
+                <br/>
                 <Term title="HINT" explanation="Once you click the Send button, your submitted statements and question will be sent to a prover.
-           It will check whether the question statement is true taking into account the submitted statements."/><span>&nbsp;&nbsp;&nbsp;</span>
-                <Button variant="contained" color="primary" onClick={this.submit}>Send</Button></div>
+           It will check whether the question statement is true taking into account the submitted statements."/><br/>
+                <Button variant="contained" color="primary" onClick={this.submit}>Send</Button>
                 <Snackbar open={this.state.noSStatements} autoHideDuration={3000} onClose={this.handleClose}>
                     <Alert onClose={this.handleClose} severity="error">You must have at least one submitted statement to send!</Alert>
                 </Snackbar>
