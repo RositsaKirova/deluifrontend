@@ -1,5 +1,3 @@
-//with the help of https://material-ui.com/ examples
-
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
@@ -13,12 +11,16 @@ const useStyles = makeStyles((theme) => ({
         top: 28,
         right: 0,
         left: 0,
-        width: 200,
+        width: 500,
         zIndex: 1,
         border: '1px solid',
         padding: theme.spacing(1),
         backgroundColor: theme.palette.background.paper,
     },
+    b: {
+        backgroundColor: theme.palette.common.black,
+        color: theme.palette.common.white
+    }
 }));
 
 export default function ClickAway(props) {
@@ -36,7 +38,7 @@ export default function ClickAway(props) {
     return (
         <ClickAwayListener onClickAway={handleClickAway}>
             <div className={classes.root}>
-                <button type="button" onClick={handleClick}>
+                <button type="button" className={classes.b} onClick={handleClick}>
                     {props.title}
                 </button>
                 {open ? (

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const ANSWER_API_REST_URL = "http://localhost:8080/answer";
+const ANSWER_API_REST_URL = "http://localhost:8081/answer";
 
 class APIService {
 

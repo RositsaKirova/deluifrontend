@@ -9,13 +9,10 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Avatar from "@material-ui/core/Avatar";
 import assistant from './images/bigbrain.jpg';
-
 import './App.css';
-
-import Term from "./components/Term";
 import TabPanel from "./components/TabPanel";
 import PuzzleBuilder from "./components/PuzzleBuilder";
-
+import Example from "./components/Example";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -59,35 +56,20 @@ function App() {
         </AppBar>
         <TabPanel value={value} index={0}>
           <header className="rowHeader">
-            <Typography variant="h4" gutterBottom>
-              Hi, I am your Assistant!
-            </Typography>
-            <div className={classes.root2}>
-              <Avatar alt="Assistant" src={assistant} className={classes.large}/>
-            </div>
+            <Typography variant="h4" gutterBottom>Hi, I am your Assistant!</Typography>
+            <div className={classes.root2}><Avatar alt="Assistant" src={assistant} className={classes.large}/></div>
           </header>
-            <div className='rowC'>
-            <Typography variant="body1" gutterBottom>
-              Before we start, make sure you know the following:<span>&nbsp;&nbsp;&nbsp;</span>
-            </Typography>
-            <Term title="agent" explanation="An agent is a subject who has a certain perspective on the situation in the puzzle - often a person."/>
-              <span>&nbsp;&nbsp;&nbsp;</span>
-            <Term title="affair" explanation="An affair is a state which can be true or false - the main facts in the puzzle."/>
-              <span>&nbsp;&nbsp;&nbsp;</span>
-              <Term title="knowledge/common knowledge" explanation="Knowledge is when an agent is aware of piece of information by his own.
-              Common knowledge is when all agents are aware that all agents in the puzzle know something. "/>
-            </div>
-          <br/>
-          <Typography variant="h5" color="secondary" gutterBottom>
-            Let's puzzle our brains!
+          <Typography variant="body1" gutterBottom>
+            Check out the EXAMPLE section to see an already filled form and read explanations about terminology.
+            You can switch between the two tabs without losing your input.
           </Typography>
+          <br/>
+          <Typography variant="h5" color="secondary" gutterBottom>Let's puzzle our brains!</Typography>
           <hr style={{color: '#4141D8', backgroundColor: '#4141D8',height: 5}}/>
           <br/>
           <PuzzleBuilder />
         </TabPanel>
-        <TabPanel value={value} index={1}>
-          Page Two...
-        </TabPanel>
+        <TabPanel value={value} index={1}><Example /></TabPanel>
       </div>
       </React.Fragment>
   );

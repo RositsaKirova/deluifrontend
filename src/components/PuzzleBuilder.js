@@ -1,168 +1,521 @@
 import React from 'react';
+import styles from "./stylesComponents";
+import {bindActionCreators} from "redux";
+import {changeTruthValue, changeCommonKnowledge, addSubmitted, removeStatement, removeSubmitted, removeQuestion, changeQuestion} from "../actions";
+import {connect} from "react-redux";
 import KeyInfo from "./KeyInfo";
+import AddAffair from "./templates/AddAffair";
+import AddAndStatement from "./templates/AddAndStatement";
+import AddOrStatement from "./templates/AddOrStatement";
+import AddIfThenStatement from "./templates/AddIfThenStatement";
+import AddPossibilityStatement from "./templates/AddPossibilityStatement";
+import AddKnowledgeStatement from "./templates/AddKnowledgeStatement";
 import Typography from "@material-ui/core/Typography";
-import Select from '@material-ui/core/Select';
-
+import Snackbar from "@material-ui/core/Snackbar";
+import MuiAlert from '@material-ui/lab/Alert';
 import '../App.css';
-import Button from "@material-ui/core/Button";
+import {withStyles} from '@material-ui/core/styles';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
+import AntSwitch from './AntSwitch'
+import Term from "./Term";
+import {
+    Button,
+    Grid,
+    Paper,
+    Popover,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow
+} from "@material-ui/core";
+import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
+import AssignmentTurnedInTwoToneIcon from '@material-ui/icons/AssignmentTurnedInTwoTone';
+import HelpIcon from '@material-ui/icons/Help';
 
-//I NEED A CHANGE
+const mapDispatchToProps = (dispatch) => {
+    return bindActionCreators({
+        changeTruthValue: statement => changeTruthValue(statement),
+        changeCommonKnowledge: statement => changeCommonKnowledge(statement),
+        addSubmitted: statement => addSubmitted(statement),
+        removeStatement: statement => removeStatement(statement),
+        removeSubmitted: statement => removeSubmitted(statement),
+        removeQuestion: statement => removeQuestion(statement),
+        changeQuestion: statement => changeQuestion(statement)
+    }, dispatch);
+}
+
+const mapStateToProps = (state) => {
+    return {
+        statements: state.statements,
+        encoded: state.encoded,
+        truthValues: state.truthValues,
+        submitted: state.submitted,
+        cksubmitted: state.cksubmitted,
+        question: state.question,
+        indexQuestion: state.statements.indexOf(state.question[0])
+    }
+}
+
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
 class PuzzleBuilder extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            agents: [],
-            affairs: [],
-            combinationsInProcess: [],
-            combinationsInProcessEncoded: [],
-            combinationsTruthValues: [],
-            finished: [],
-            combinations: '',
-            affair: "Select an affair",
-            testVariable1: true,
-            testVariable2: true
+            alreadyAdded: false,
+            sameBothSides: false,
+            noSStatements: false,
+            noQ: false,
+            anchorEl: null,
+            anchorEl2: null,
+            anchorEl3: null,
+            anchorEl4: null,
+            anchorEl5: null,
+            open: false,
+            open2: false,
+            open3: false,
+            open4: false,
+            open5: false
         };
-        this.addAffair = this.addAffair.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+        this.handlePopoverClose = this.handlePopoverClose.bind(this);
+        this.removeQuestion = this.removeQuestion.bind(this);
     }
 
-    callbackAgents = async (agentsData, numberOfAgents, numberOfChangedAgent) => {
-        await this.setState({agents: agentsData})
-    }
-
-    callbackAffairs = async (affairsData, numberOfAffairs, numberOfChangedAffair) => {
-        let affairsNumberNow = this.state.affairs.length;
-        if(numberOfAffairs >= 0 && numberOfAffairs < affairsNumberNow){
-            if(numberOfAffairs < this.state.affair){
-                await this.setState({affair: "Select an affair"})
-            }
-            this.removeAffairsFromCombinations(parseInt(numberOfAffairs) + 1, affairsNumberNow);
+    handleChange = (event, index) => {
+        let combEncoded = this.props.encoded[index];
+        let comb = this.props.statements[index];
+        if(event){
+            combEncoded = combEncoded.substring(2);
+            combEncoded = combEncoded.slice(0,-1);
+            comb = comb.substring(5);
+            comb = "true" + comb;
         } else {
-            this.updateAffairsInCombinations(this.state.affairs[numberOfChangedAffair], affairsData[numberOfChangedAffair]);
+            combEncoded = "~(" + combEncoded + ")";
+            comb = comb.substring(4);
+            comb = "false" + comb;
         }
-        await this.setState({
-            affairs: affairsData,
+        this.props.changeTruthValue([index, comb, combEncoded, event]);
+    }
+
+    handleCKswitch = (event, index) => {
+        this.props.changeCommonKnowledge([index, event]);
+    }
+
+    alreadyAddedHandler = () => {
+        this.setState({
+            alreadyAdded: true
         })
     }
 
-    handleAffairChange = (event) => {
-        this.setState({affair: event})
-    };
+    sameBothSidesHandler = () => {
+        this.setState({
+            sameBothSides: true
+        })
+    }
 
-    async addAffair() {
-        let combEncoded = this.state.combinationsInProcessEncoded;
-        let comb = this.state.combinationsInProcess;
-        let indexAffair = this.state.affair;
-        if (!(indexAffair === "Select an affair")) {
-            let newAffairEncoded = 'a' + indexAffair;
-            if(combEncoded.indexOf(newAffairEncoded) === -1){
-                combEncoded.push(newAffairEncoded);
-                comb.push("affair(" + this.state.affairs[indexAffair-1] + ")");
-            }
-            await this.setState({
-                combinationsInProcessEncoded: combEncoded,
-                combinationsInProcess: comb
+    noSubmittedStatements = () => {
+        this.setState({
+            noSStatements: true
+        })
+    }
+
+    noQuestion = () => {
+        this.setState({
+            noQ: true
+        })
+    }
+
+    handleClose() {
+        this.setState({
+            alreadyAdded: false,
+            sameBothSides: false,
+            noSStatements: false,
+            noQ: false
+        })
+    }
+
+    handlePopoverOpen = (numberOfIcon, event) => {
+        if(numberOfIcon === 1) {
+            this.setState({
+                anchorEl: event.currentTarget,
+                open: true
             })
         }
+        if(numberOfIcon === 2) {
+            this.setState({
+                anchorEl2: event.currentTarget,
+                open2: true
+            })
+        }
+        if(numberOfIcon === 3) {
+            this.setState({
+                anchorEl3: event.currentTarget,
+                open3: true
+            })
+        }
+        if(numberOfIcon === 4) {
+            this.setState({
+                anchorEl4: event.currentTarget,
+                open4: true
+            })
+        }
+        if(numberOfIcon === 5) {
+            this.setState({
+                anchorEl5: event.currentTarget,
+                open5: true
+            })
+        }
+    };
+
+    handlePopoverClose(numberOfIcon) {
+        if(numberOfIcon === 1) {
+            this.setState({
+                anchorEl: null,
+                open: false
+            })
+        }
+        if(numberOfIcon === 2) {
+            this.setState({
+                anchorEl2: null,
+                open2: false
+            })
+        }
+        if(numberOfIcon === 3) {
+            this.setState({
+                anchorEl3: null,
+                open3: false
+            })
+        }
+        if(numberOfIcon === 4) {
+            this.setState({
+                anchorEl4: null,
+                open4: false
+            })
+        }
+        if(numberOfIcon === 5) {
+            this.setState({
+                anchorEl5: null,
+                open5: false
+            })
+        }
+    };
+
+    addToFinished(index){
+        this.props.addSubmitted([this.props.statements[index], this.props.encoded[index]]);
     }
 
-    removeAffairsFromCombinations = (start, stop) => {
-        let combinationsEncoded = this.state.combinationsInProcessEncoded;
-        let combinations = this.state.combinationsInProcess;
-        let indexes = new Set();
-        for (let i = 0; i < combinationsEncoded.length; i++) {
-            for (let j = start; j <= stop; j++) {
-                console.log("start - " + start);
-                if(combinationsEncoded[i].includes('a' + start)){
-                    indexes.add(i);
-                }
-            }
-        }
-
-        console.log("before - " + combinationsEncoded);
-        console.log("before - " + combinations);
-
-        [].slice.call(indexes).sort();
-        console.log(indexes);
-
-        for (let x = indexes.size -1; x >= 0; x--) {
-            let elementToRemove = Array.from(indexes)[x];
-            combinationsEncoded.splice(elementToRemove, 1);
-            combinations.splice(elementToRemove, 1);
-        }
-
-        console.log("after - " + combinationsEncoded);
-        console.log("after - " + combinations);
-
+    setQuestion(index){
+        this.props.changeQuestion(index);
         this.setState({
-            combinationsInProcessEncoded: combinationsEncoded,
-            combinationsInProcess: combinations
+            open5: false
         })
     }
 
-    updateAffairsInCombinations = (nameBefore, nameAfter) => {
-        let combinations = this.state.combinationsInProcess;
-
-        for (let i = 0; i < combinations.length; i++) {
-            if(combinations[i].includes('affair(' + nameBefore + ")")){
-                console.log(combinations[i]);
-                let newString = combinations[i].replace(nameBefore, nameAfter);
-                combinations[i] = newString;
-                console.log(combinations[i]);
-            }
-        }
+    removeFromCombinationsInProcess = (index) => {
+        this.props.removeStatement(index);
         this.setState({
-            combinationsInProcess: combinations
+            open2: false
         })
     }
+
+    removeFromFinished = (index) => {
+        this.props.removeSubmitted(index);
+        this.setState({
+            open3: false
+        })
+    }
+
+    removeQuestion(){
+        this.props.removeQuestion();
+    }
+
+    submit = () =>{
+        if(!(this.props.submitted.length > 0)){
+            this.noSubmittedStatements();
+        } else if(!(this.props.question.length > 0)){
+            this.noQuestion();
+        } else{
+            alert("Your submitted statement(s) and question were successfully sent to a prover.");
+        }
+    };
 
     render() {
+        const { classes } = this.props;
         return (
             <div>
+                <Term title="HINT" explanation="You must answer the questions to proceed further."/>
                 <div className='rowC'>
-                <KeyInfo info={"agent"} elementsCallback={this.callbackAgents}/>
-                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                <KeyInfo info={"affair"} elementsCallback={this.callbackAffairs}/>
+                <KeyInfo info={"agent"} /><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><KeyInfo info={"state"} />
                 </div>
                 <br/>
-                <Typography variant="h6" gutterBottom>
-                    Templates to use:
-                </Typography>
-                <div className='rowC'>
-                    <span>&nbsp;&nbsp;&nbsp;</span>
-                    <Select
-                        value={this.state.affair}
-                        onChange={e => this.handleAffairChange(e.target.value)}
-                    >
-                        <option value="Select an affair" disabled>Select an affair</option>
-                        {this.state.affairs.map((item, index) => (
-                            <option value={index+1} >{item}</option>))}
-                    </Select>
-                    <span>&nbsp;&nbsp;&nbsp;</span>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={this.addAffair}
-                    >
-                        Add
-                    </Button>
-                    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                    <input readOnly value="AND" style={{ width: "50px", textAlign: "center" }}/>
-                </div>
+                <Typography variant="h6" gutterBottom>Templates to use:</Typography>
+                <div className="rowC">
+                    <Term title="HINT" explanation="You must first add some states. Those will turn into statements. Then use the rest of the templates."/><span>&nbsp;&nbsp;&nbsp;</span>
+                    <Term title="another HINT" explanation="No template for common knowledge available. Later on, you can set your submitted statements to be common knowledge."/>
+                </div><br/>
+                <TableContainer component={Paper}>
+                    <Table className={classes.table} aria-label="simple table">
+                        <TableBody>
+                            <TableRow>
+                                <TableCell align="left"> <AddAffair setAlreadyAddedHandler={this.alreadyAddedHandler} /></TableCell>
+                                <TableCell align="left"><AddIfThenStatement setAlreadyAddedHandler={this.alreadyAddedHandler} setsameBothSidesHandler={this.sameBothSidesHandler}/></TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell align="left"><AddAndStatement setAlreadyAddedHandler={this.alreadyAddedHandler} setsameBothSidesHandler={this.sameBothSidesHandler}/></TableCell>
+                                <TableCell align="left"><AddPossibilityStatement setAlreadyAddedHandler={this.alreadyAddedHandler}/></TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell align="left"><AddOrStatement setAlreadyAddedHandler={this.alreadyAddedHandler} setsameBothSidesHandler={this.sameBothSidesHandler}/></TableCell>
+                                <TableCell align="left"><AddKnowledgeStatement setAlreadyAddedHandler={this.alreadyAddedHandler}/></TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </TableContainer>
                 <br/>
-                <Typography variant="h6" gutterBottom>
-                    Combinations in process:
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                    Decide on which ones are true ............
-                </Typography>
-                <ul>
-                    {this.state.combinationsInProcess.map((item) => (
-                        <li key={item}>{item}</li>
+                <Snackbar open={this.state.alreadyAdded} autoHideDuration={3000} onClose={this.handleClose}>
+                    <Alert onClose={this.handleClose} severity="warning">You already added this one!</Alert>
+                </Snackbar>
+                <Snackbar open={this.state.sameBothSides} autoHideDuration={3000} onClose={this.handleClose}>
+                    <Alert onClose={this.handleClose} severity="warning">You need to select different combinations on the different sides!</Alert>
+                </Snackbar>
+                <div className="rowC">
+                    <Term title="HINT" explanation="A statement in 'Statements in progress' could be any statement. A statement in 'Submitted statements' should be explaining a piece of information from the puzzle you want to solve."/><span>&nbsp;&nbsp;&nbsp;</span>
+                    <Term title="another HINT" explanation="A statement can't be a submitted statement and a question in the same time."/>
+                </div><br/>
+                <div className='rowC'>
+                    <Table className="float-left" style={{ width: "46vw", border: "3px solid rgb(0, 0, 0)"}} aria-label="simple table">
+                        <TableHead className={classes.head}>
+                            <TableRow>
+                                <TableCell className={classes.cellHeadFontSize}>Statements in progress</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                    {this.props.statements.map((item, index) => (
+                        <TableRow>
+                            <TableCell className={classes.cellFontSize} align="left">
+                                <div className='rowC'>
+                                    <span className={(this.props.truthValues[index] ? null : classes.redText)}>{index + 1}. {item}</span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                    {(this.props.statements[index].includes(" it is possible that "))
+                                        ? null : <Typography component="div">
+                                <Grid component="label" container alignItems="center" spacing={1}>
+                                    <Grid item>False</Grid><Grid item>
+                                        <AntSwitch checked={this.props.truthValues[index]} onChange={e => this.handleChange(e.target.checked, index)}/>
+                                    </Grid><Grid item>True</Grid>
+                                </Grid>
+                            </Typography>}<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><AssignmentTurnedInTwoToneIcon
+                                fontSize="large"
+                                color="primary"
+                                className= {(index === this.props.indexQuestion || this.props.submitted.indexOf(item) !== -1) ?
+                                    classes.hidden : null}
+                                aria-owns={this.state.open ? 'mouse-over-popover' : undefined} aria-haspopup="true"
+                                onMouseEnter={e => this.handlePopoverOpen(1, e)}
+                                onMouseLeave={() => this.handlePopoverClose(1)}
+                                onClick={() => this.addToFinished(index)}
+                            ></AssignmentTurnedInTwoToneIcon>
+                                <Popover
+                                    id="mouse-over-popover"
+                                    className={classes.popover}
+                                    classes={{
+                                        paper: classes.paper,
+                                    }}
+                                    open={this.state.open}
+                                    anchorEl={this.state.anchorEl}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'left',
+                                    }}
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'left',
+                                    }}
+                                    onClose={() => this.handlePopoverClose(1)}
+                                    disableRestoreFocus
+                                >
+                                    <Typography>Submit statement.</Typography>
+                                </Popover>
+                            <span>&nbsp;&nbsp;&nbsp;</span><DeleteForeverOutlinedIcon
+                            fontSize="large"
+                            color="primary"
+                            aria-owns={this.state.open2 ? 'mouse-over-popover' : undefined}
+                            aria-haspopup="true"
+                            onMouseEnter={e => this.handlePopoverOpen(2, e)}
+                            onMouseLeave={() => this.handlePopoverClose(2)}
+                            onClick={() => this.removeFromCombinationsInProcess(index)}></DeleteForeverOutlinedIcon>
+                                <Popover
+                                    id="mouse-over-popover"
+                                    className={classes.popover}
+                                    classes={{
+                                        paper: classes.paper,
+                                    }}
+                                    open={this.state.open2}
+                                    anchorEl={this.state.anchorEl2}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'left',
+                                    }}
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'left',
+                                    }}
+                                    onClose={() => this.handlePopoverClose(2)}
+                                    disableRestoreFocus
+                                >
+                                    <Typography>Remove statement.</Typography>
+                                </Popover>
+                                    <span>&nbsp;&nbsp;&nbsp;</span><HelpIcon
+                                        fontSize="large"
+                                        color="primary"
+                                        className= {((this.props.question && this.props.question.length) || this.props.submitted.indexOf(item) !== -1)
+                                             ? classes.hidden : null}
+                                        aria-owns={this.state.open5 ? 'mouse-over-popover' : undefined}
+                                        aria-haspopup="true"
+                                        onMouseEnter={e => this.handlePopoverOpen(5, e)}
+                                        onMouseLeave={() => this.handlePopoverClose(5)}
+                                        onClick={() => this.setQuestion(index)}></HelpIcon>
+                                    <Popover
+                                        id="mouse-over-popover"
+                                        className={classes.popover}
+                                        classes={{
+                                            paper: classes.paper,
+                                        }}
+                                        open={this.state.open5}
+                                        anchorEl={this.state.anchorEl5}
+                                        anchorOrigin={{
+                                            vertical: 'bottom',
+                                            horizontal: 'left',
+                                        }}
+                                        transformOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'left',
+                                        }}
+                                        onClose={() => this.handlePopoverClose(5)}
+                                        disableRestoreFocus
+                                    >
+                                        <Typography>Check statement.</Typography>
+                                    </Popover>
+                                </div>
+                            </TableCell>
+                        </TableRow>
                     ))}
-                </ul>
+                        </TableBody>
+                    </Table>
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <div className="float-right">
+                    <Table style={{ width: "46vw", border: "3px solid rgb(0, 0, 0)"}} aria-label="simple table">
+                        <TableHead className={classes.head}>
+                            <TableRow >
+                                <TableCell className={classes.cellHeadFontSize}>Submitted statements</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {this.props.submitted.map((item, index) => (
+                                <TableRow>
+                                    <TableCell className={classes.cellFontSize} align="left">
+                                        {index + 1}. {item} <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                        <FormControlLabel
+                                            control={<Switch checked={this.props.cksubmitted[index]} onChange={e => this.handleCKswitch(e.target.checked, index)}/>}
+                                            label="is common knowledge"
+                                        />
+                                        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><DeleteForeverOutlinedIcon
+                                        fontSize="large"
+                                        color="primary"
+                                        aria-owns={this.state.open3 ? 'mouse-over-popover' : undefined}
+                                        aria-haspopup="true"
+                                        onMouseEnter={e => this.handlePopoverOpen(3, e)}
+                                        onMouseLeave={() => this.handlePopoverClose(3)}
+                                        onClick={() => this.removeFromFinished(index)}></DeleteForeverOutlinedIcon>
+                                        <Popover
+                                            id="mouse-over-popover"
+                                            className={classes.popover}
+                                            classes={{
+                                                paper: classes.paper,
+                                            }}
+                                            open={this.state.open3}
+                                            anchorEl={this.state.anchorEl3}
+                                            anchorOrigin={{
+                                                vertical: 'bottom',
+                                                horizontal: 'left',
+                                            }}
+                                            transformOrigin={{
+                                                vertical: 'top',
+                                                horizontal: 'left',
+                                            }}
+                                            onClose={() => this.handlePopoverClose(3)}
+                                            disableRestoreFocus
+                                        >
+                                            <Typography>Remove statement.</Typography>
+                                        </Popover>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <Table className="float-right" style={{ width: "46vw", border: "3px solid rgb(0, 0, 0)"}} aria-label="simple table">
+                        <TableHead className={classes.head}>
+                            <TableRow >
+                                <TableCell className={classes.cellHeadFontSize}>Your question:</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {this.props.question.map((item) => (
+                                <TableRow>
+                                    <TableCell className={classes.cellFontSize} align="left">
+                                        {item} <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><DeleteForeverOutlinedIcon
+                                        fontSize="large"
+                                        color="primary"
+                                        aria-owns={this.state.open4 ? 'mouse-over-popover' : undefined}
+                                        aria-haspopup="true"
+                                        onMouseEnter={e => this.handlePopoverOpen(4, e)}
+                                        onMouseLeave={() => this.handlePopoverClose(4)}
+                                        onClick={this.removeQuestion}></DeleteForeverOutlinedIcon>
+                                        <Popover
+                                            id="mouse-over-popover"
+                                            className={classes.popover}
+                                            classes={{
+                                                paper: classes.paper,
+                                            }}
+                                            open={this.state.open3}
+                                            anchorEl={this.state.anchorEl3}
+                                            anchorOrigin={{
+                                                vertical: 'bottom',
+                                                horizontal: 'left',
+                                            }}
+                                            transformOrigin={{
+                                                vertical: 'top',
+                                                horizontal: 'left',
+                                            }}
+                                            onClose={() => this.handlePopoverClose(4)}
+                                            disableRestoreFocus
+                                        >
+                                            <Typography>Remove question.</Typography>
+                                        </Popover>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                    </div>
+                </div>
+                <br/>
+                <Term title="HINT" explanation="Once you click the Send button, your submitted statements and question will be sent to a prover.
+           It will check whether the question statement is true taking into account the submitted statements."/><br/>
+                <Button variant="contained" color="primary" onClick={this.submit}>Send</Button>
+                <Snackbar open={this.state.noSStatements} autoHideDuration={3000} onClose={this.handleClose}>
+                    <Alert onClose={this.handleClose} severity="error">You must have at least one submitted statement to send!</Alert>
+                </Snackbar>
+                <Snackbar open={this.state.noQ} autoHideDuration={3000} onClose={this.handleClose}>
+                    <Alert onClose={this.handleClose} severity="error">You must have a question to send!</Alert>
+                </Snackbar>
             </div>
         )
     }
 }
 
-export default PuzzleBuilder;
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(PuzzleBuilder));
