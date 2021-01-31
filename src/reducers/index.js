@@ -24,7 +24,8 @@ const initialState = {
     leftThen: "Select a statement",
     rightThen: "Select a statement",
     knows: "Select a statement",
-    pknowledge: "Select a statement"
+    pknowledge: "Select a statement",
+    answer: ''
 };
 
 function substringBetween(s, a, b) {

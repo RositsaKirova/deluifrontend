@@ -1,4 +1,5 @@
 import React from 'react';
+import APIService from '../service/APIService';
 import styles from "./stylesComponents";
 import {bindActionCreators} from "redux";
 import {changeTruthValue, changeCommonKnowledge, addSubmitted, removeStatement, removeSubmitted, removeQuestion, changeQuestion} from "../actions";
@@ -53,8 +54,10 @@ const mapStateToProps = (state) => {
         encoded: state.encoded,
         truthValues: state.truthValues,
         submitted: state.submitted,
+        submittedEncoded: state.submittedEncoded,
         cksubmitted: state.cksubmitted,
         question: state.question,
+        questionEncoded: state.questionEncoded,
         indexQuestion: state.statements.indexOf(state.question[0])
     }
 }
@@ -67,6 +70,7 @@ class PuzzleBuilder extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            title: "HINT",
             alreadyAdded: false,
             sameBothSides: false,
             noSStatements: false,
@@ -241,7 +245,21 @@ class PuzzleBuilder extends React.Component {
         } else if(!(this.props.question.length > 0)){
             this.noQuestion();
         } else{
-            alert("Your submitted statement(s) and question were successfully sent to a prover.");
+            APIService.postQuestion(this.props.submittedEncoded, this.props.cksubmitted, this.props.questionEncoded)
+                .then((response) => {
+                    if(response.data != null){
+                        alert("Your submitted statement(s) and question were successfully sent to a prover.");
+                    }
+                })
+                .catch(function (ex) {
+                    console.log('Response parsing failed. Error: ', ex);
+                });
+            APIService.getTruthValueAnswer().then((response) => {
+                console.log(response)
+            })
+                .catch(function (ex) {
+                    console.log('Response parsing failed. Error: ', ex);
+                });
         }
     };
 
@@ -249,15 +267,15 @@ class PuzzleBuilder extends React.Component {
         const { classes } = this.props;
         return (
             <div>
-                <Term title="HINT" explanation="You must answer the questions to proceed further."/>
+                <Term title={this.state.title} explanation="You must answer the questions to proceed further."/>
                 <div className='rowC'>
                 <KeyInfo info={"agent"} /><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><KeyInfo info={"state"} />
                 </div>
                 <br/>
                 <Typography variant="h6" gutterBottom>Templates to use:</Typography>
                 <div className="rowC">
-                    <Term title="HINT" explanation="You must first add some states. Those will turn into statements. Then use the rest of the templates."/><span>&nbsp;&nbsp;&nbsp;</span>
-                    <Term title="another HINT" explanation="No template for common knowledge available. Later on, you can set your submitted statements to be common knowledge."/>
+                    <Term title={this.state.title} explanation="You must first add some states. Those will turn into statements. Then use the rest of the templates."/><span>&nbsp;&nbsp;&nbsp;</span>
+                    <Term title={this.state.title} explanation="No template for common knowledge available. Later on, you can set your submitted statements to be common knowledge."/>
                 </div><br/>
                 <TableContainer component={Paper}>
                     <Table className={classes.table} aria-label="simple table">
@@ -285,8 +303,8 @@ class PuzzleBuilder extends React.Component {
                     <Alert onClose={this.handleClose} severity="warning">You need to select different combinations on the different sides!</Alert>
                 </Snackbar>
                 <div className="rowC">
-                    <Term title="HINT" explanation="A statement in 'Statements in progress' could be any statement. A statement in 'Submitted statements' should be explaining a piece of information from the puzzle you want to solve."/><span>&nbsp;&nbsp;&nbsp;</span>
-                    <Term title="another HINT" explanation="A statement can't be a submitted statement and a question in the same time."/>
+                    <Term title={this.state.title} explanation="A statement in 'Statements in progress' could be any statement. A statement in 'Submitted statements' should be explaining a piece of information from the puzzle you want to solve."/><span>&nbsp;&nbsp;&nbsp;</span>
+                    <Term title={this.state.title} explanation="A statement can't be a submitted statement and a question in the same time."/>
                 </div><br/>
                 <div className='rowC'>
                     <Table className="float-left" style={{ width: "46vw", border: "3px solid rgb(0, 0, 0)"}} aria-label="simple table">
@@ -504,7 +522,7 @@ class PuzzleBuilder extends React.Component {
                     </div>
                 </div>
                 <br/>
-                <Term title="HINT" explanation="Once you click the Send button, your submitted statements and question will be sent to a prover.
+                <Term title={this.state.title} explanation="Once you click the Send button, your submitted statements and question will be sent to a prover.
            It will check whether the question statement is true taking into account the submitted statements."/><br/>
                 <Button variant="contained" color="primary" onClick={this.submit}>Send</Button>
                 <Snackbar open={this.state.noSStatements} autoHideDuration={3000} onClose={this.handleClose}>

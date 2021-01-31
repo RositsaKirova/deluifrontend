@@ -1,11 +1,11 @@
-import Select from "@material-ui/core/Select";
-import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 import React from "react";
 import styles from "../stylesComponents";
 import {bindActionCreators} from "redux";
 import {addStatement, changeAgentsWithPossibleKnowledge, changePossibleKnowledge} from "../../actions";
 import {withStyles} from "@material-ui/core/styles";
 import {connect} from "react-redux";
+import Select from "@material-ui/core/Select";
+import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 import MenuItem from "@material-ui/core/MenuItem";
 import Checkbox from "@material-ui/core/Checkbox";
 import ListItemText from "@material-ui/core/ListItemText";

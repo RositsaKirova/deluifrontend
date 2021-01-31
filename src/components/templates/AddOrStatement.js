@@ -1,11 +1,11 @@
-import Select from "@material-ui/core/Select";
-import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 import React from "react";
 import styles from "../stylesComponents";
 import {bindActionCreators} from "redux";
 import {addStatement, changeLeftOr, changeRightOr} from "../../actions";
 import {withStyles} from "@material-ui/core/styles";
 import {connect} from "react-redux";
+import Select from "@material-ui/core/Select";
+import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators({

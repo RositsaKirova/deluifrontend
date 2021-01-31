@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+//props = title, explanation
 export default function ClickAway(props) {
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
@@ -38,11 +39,11 @@ export default function ClickAway(props) {
     return (
         <ClickAwayListener onClickAway={handleClickAway}>
             <div className={classes.root}>
-                <button type="button" className={classes.b} onClick={handleClick}>
+                <button data-testid="title" type="button" className={classes.b} onClick={handleClick}>
                     {props.title}
                 </button>
                 {open ? (
-                    <div className={classes.dropdown}>
+                    <div data-testid="explanation" className={classes.dropdown}>
                         {props.explanation}
                     </div>
                 ) : null}
