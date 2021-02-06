@@ -1,7 +1,7 @@
-import { REMOVE_ELEMENTS, REMOVE_STATEMENT, REMOVE_SUBMITTED, REMOVE_QUESTION, ADD_ELEMENTS, RENAME_ELEMENTS, ADD_STATEMENT, ADD_SUBMITTED,
-    CHANGE_AFFAIR, CHANGE_LEFT_AND, CHANGE_RIGHT_AND, CHANGE_LEFT_OR, CHANGE_RIGHT_OR, CHANGE_LEFT_THEN, CHANGE_RIGHT_THEN,
-    CHANGE_POSSIBLE_KNOWLEDGE, CHANGE_AGENTS_WITH_POSSIBLE_KNOWLEDGE, CHANGE_KNOWLEDGE, CHANGE_AGENTS_WITH_KNOWLEDGE, CHANGE_COMMON_KNOWLEDGE,
-    CHANGE_TRUTH_VALUE, CHANGE_QUESTION} from "../constants/action-types";
+import { REMOVE_ELEMENTS, REMOVE_ELEMENT, REMOVE_STATEMENT, REMOVE_SUBMITTED, REMOVE_QUESTION, ADD_ELEMENTS, RENAME_ELEMENTS,
+    ADD_STATEMENT, ADD_SUBMITTED, CHANGE_AFFAIR, CHANGE_LEFT_AND, CHANGE_RIGHT_AND, CHANGE_LEFT_OR, CHANGE_RIGHT_OR, CHANGE_LEFT_THEN,
+    CHANGE_RIGHT_THEN, CHANGE_POSSIBLE_KNOWLEDGE, CHANGE_AGENTS_WITH_POSSIBLE_KNOWLEDGE, CHANGE_KNOWLEDGE, CHANGE_AGENTS_WITH_KNOWLEDGE,
+    CHANGE_COMMON_KNOWLEDGE, CHANGE_TRUTH_VALUE, CHANGE_QUESTION, RESET} from "../constants/action-types";
 
 const initialState = {
     agents: [],
@@ -25,7 +25,6 @@ const initialState = {
     rightThen: "Select a statement",
     knows: "Select a statement",
     pknowledge: "Select a statement",
-    answer: ''
 };
 
 function substringBetween(s, a, b) {
@@ -122,6 +121,87 @@ function rootReducer(state = initialState, action) {
                 });
             }
         }
+        case REMOVE_ELEMENT: {
+            let name = action.payload[0];
+            let number = parseInt(action.payload[1]);
+            let combInProcess = state.statements.slice();
+            let combInProcessEncoded = state.encoded.slice();
+            let tValues = state.truthValues.slice();
+            let combSubmitted = state.submitted.slice();
+            let combSubmittedEncoded = state.submittedEncoded.slice();
+            let affairNumber = state.affair;
+            let element;
+            if (name === "agent") {
+                element = 'ag';
+            } else {
+                element = 'a';
+                if(number === affairNumber){
+                    affairNumber = "Select a state";
+                }
+            }
+
+            let indexes = new Set();
+            let indexesFinished = new Set();
+            for (let i = 0; i < combInProcessEncoded.length; i++) {
+                if (combInProcessEncoded[i].includes(element + (number + 1))) {
+                    indexes.add(i);
+                }
+            }
+            for (let i = 0; i < combSubmittedEncoded.length; i++) {
+                if (combSubmittedEncoded[i].includes(element + (number + 1))) {
+                    indexesFinished.add(i);
+                }
+            }
+            [].slice.call(indexes).sort();
+            [].slice.call(indexesFinished).sort();
+            for (let x = indexes.size -1; x >= 0; x--) {
+                let elementToRemove = Array.from(indexes)[x];
+                combInProcessEncoded.splice(elementToRemove, 1);
+                combInProcess.splice(elementToRemove, 1);
+                tValues.splice(elementToRemove, 1);
+            }
+
+            for (let x = indexesFinished.size -1; x >= 0; x--) {
+                let elementToRemove = Array.from(indexesFinished)[x];
+                combSubmittedEncoded.splice(elementToRemove, 1);
+                combSubmitted.splice(elementToRemove, 1);
+            }
+            if (name === "agent") {
+                let agents = state.agents.slice();
+                agents.splice(number,1)
+                return Object.assign({}, state, {
+                    encoded: combInProcessEncoded,
+                    statements: combInProcess,
+                    truthValues: tValues,
+                    submittedEncoded: combSubmittedEncoded,
+                    submitted: combSubmitted,
+                    agents: agents,
+                    agent: ["agent(s)"],
+                    agent2: ["agent(s)"]
+                });
+            } else {
+                let affairs = state.affairs.slice();
+                affairs.splice(number,1)
+                return Object.assign({}, state, {
+                    statements: combInProcess,
+                    encoded: combInProcessEncoded,
+                    truthValues: tValues,
+                    submittedEncoded: combSubmittedEncoded,
+                    submitted: combSubmitted,
+                    affairs: affairs,
+                    affair: affairNumber,
+                    leftAnd: "Select a statement",
+                    rightAnd: "Select a statement",
+                    leftOr: "Select a statement",
+                    rightOr: "Select a statement",
+                    leftThen: "Select a statement",
+                    rightThen: "Select a statement",
+                    knows: "Select a statement",
+                    cknowledge: "Select a statement",
+                    pknowledge: "Select a statement",
+                });
+            }
+        }
         case REMOVE_STATEMENT: {
             let index = action.payload;
             let statements = state.statements.slice();
@@ -159,20 +239,31 @@ function rootReducer(state = initialState, action) {
         case ADD_ELEMENTS: {
             let name = action.payload[0];
             let number = parseInt(action.payload[1]);
+            let agents = state.agents.slice();
+            let affairs = state.affairs.slice();
             let stop;
             if (name === "agent") {
-                stop = state.agents.slice();
-            } else {
-                stop = state.affairs.slice();
-            }
-            for (let i = stop.length + 1; i <= number; i++) {
-                stop = stop.concat(i.toString());
-            }
-            if (name === "agent") {
+                stop = agents;
+                for (let i = stop.length + 1; i <= number; i++) {
+                    let newName = "ag".concat(i.toString());
+                    while(stop.some(item => newName === item) || affairs.some(item => newName === item)){
+                        newName = newName.substring(2);
+                        newName = "ag0".concat(newName);
+                    }
+                    stop = stop.concat(newName);
+                }
                 return Object.assign({}, state, {
                     agents: stop
                 });
             } else {
+                stop = affairs;
+                for (let i = stop.length + 1; i <= number; i++) {
+                    let name = i.toString();
+                    while(stop.some(item => name === item) || agents.some(item => name === item)){
+                        name = "0".concat(name);
+                    }
+                    stop = stop.concat(name);
+                }
                 return Object.assign({}, state, {
                     affairs: stop
                 });
@@ -288,7 +379,7 @@ function rootReducer(state = initialState, action) {
         case ADD_STATEMENT: {
             return Object.assign({}, state, {
                 statements: state.statements.slice().concat(action.payload[0]),
-                encoded: state.encoded.slice().concat(action.payload[1]),
+                encoded: state.encoded.slice().concat(action.payload[1].toString()),
                 truthValues: state.truthValues.slice().concat(true)
             });
         }
@@ -381,6 +472,31 @@ function rootReducer(state = initialState, action) {
             return Object.assign({}, state, {
                 question: [state.statements.slice()[index]],
                 questionEncoded: state.encoded.slice()[index]
+            });
+        }
+        case RESET: {
+            return Object.assign({}, state, {
+                agents: [],
+                affairs: [],
+                statements: [],
+                encoded: [],
+                truthValues: [],
+                submitted: [],
+                submittedEncoded: [],
+                cksubmitted: [],
+                question: [],
+                questionEncoded: '',
+                agent: ["agent(s)"],
+                agent2: ["agent(s)"],
+                affair: "Select a state",
+                leftAnd: "Select a statement",
+                rightAnd: "Select a statement",
+                leftOr: "Select a statement",
+                rightOr: "Select a statement",
+                leftThen: "Select a statement",
+                rightThen: "Select a statement",
+                knows: "Select a statement",
+                pknowledge: "Select a statement",
             });
         }
         default:

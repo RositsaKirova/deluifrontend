@@ -17,12 +17,11 @@ class APIService {
     postQuestion(submittedEncoded, commonKnowledgeList, questionEncoded) {
         let formData = new FormData();
         formData.append("submittedStatements", submittedEncoded);
-        console.log(submittedEncoded);
+        //console.log(submittedEncoded);
         formData.append("listCommonK", commonKnowledgeList);
-        console.log(commonKnowledgeList);
+        //console.log(commonKnowledgeList);
         formData.append("question", questionEncoded);
-        console.log(questionEncoded);
-        console.log(formData);
+        //console.log(questionEncoded);
         return instance.post(SEND_API_REST_URL, formData, {headers:{"Content-Type" : "multipart/form-data"}});
     }
 

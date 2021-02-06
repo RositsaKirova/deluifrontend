@@ -66,8 +66,8 @@ class AddKnowledgeStatement extends React.Component {
         let agents = this.props.agent;
         if(agents && agents.length && !(this.props.knows === "Select a statement")){let indexesAgents = [];
             agents.map((item) => indexesAgents.push(this.props.agents.indexOf(item) + 1));
-            let indexAgent = "{ag" + indexesAgents.join(',ag') + "}";
-            let newEncoded = "K" + indexAgent + "(" + this.props.encoded[this.props.knows] + ")";
+            let indexAgent = "{ag" + indexesAgents.join(",ag") + "}";
+            let newEncoded = "K" + indexAgent.toString() + "(" + this.props.encoded[this.props.knows] + ")";
             if (this.props.encoded.indexOf(newEncoded) === -1 && this.props.encoded.indexOf("~(" + newEncoded + ")") === -1) {
                 let cE;
                 if(agents.length > 1){
@@ -75,9 +75,15 @@ class AddKnowledgeStatement extends React.Component {
                 } else {
                     cE = "true: agent(" + agents.join(',') + ") knows that (" + this.props.statements[this.props.knows] + ")";
                 }
+                console.log("new: " + newEncoded);
+                console.log("encodedBefore: " + this.props.encoded);
                 this.props.addStatement([cE, newEncoded]);
                 this.props.changeAgentsWithKnowledge(["agent(s)"]);
                 this.props.changeKnowledge("Select a statement");
+                this.props.encoded.map((item)=>
+                console.log(item)
+                );
+                console.log("encodedAfter: " + this.props.encoded);
             } else {
                 this.props.setAlreadyAddedHandler();
             }
