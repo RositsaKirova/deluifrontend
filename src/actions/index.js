@@ -1,7 +1,7 @@
 import { REMOVE_ELEMENTS, REMOVE_ELEMENT, REMOVE_STATEMENT, REMOVE_SUBMITTED, REMOVE_QUESTION, ADD_ELEMENTS, RENAME_ELEMENTS,
     ADD_STATEMENT, ADD_SUBMITTED, CHANGE_AFFAIR, CHANGE_LEFT_AND, CHANGE_RIGHT_AND, CHANGE_LEFT_OR, CHANGE_RIGHT_OR, CHANGE_LEFT_THEN,
     CHANGE_RIGHT_THEN, CHANGE_POSSIBLE_KNOWLEDGE, CHANGE_AGENTS_WITH_POSSIBLE_KNOWLEDGE, CHANGE_KNOWLEDGE, CHANGE_AGENTS_WITH_KNOWLEDGE,
-    CHANGE_COMMON_KNOWLEDGE, CHANGE_TRUTH_VALUE, CHANGE_QUESTION, RESET} from "../constants/action-types";
+    CHANGE_COMMON_KNOWLEDGE, CHANGE_TRUTH_VALUE, CHANGE_QUESTION, RESET, CHANGE_EXAMPLE} from "../constants/action-types";
 
 export function removeElements(payload) {
     return { type: REMOVE_ELEMENTS, payload}
@@ -97,4 +97,8 @@ export function changeQuestion(payload) {
 
 export function reset(payload) {
     return { type: RESET, payload}
+};
+
+export function changeExample(payload) {
+    return { type: CHANGE_EXAMPLE, payload}
 };

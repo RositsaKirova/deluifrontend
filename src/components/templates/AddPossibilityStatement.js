@@ -9,6 +9,7 @@ import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 import MenuItem from "@material-ui/core/MenuItem";
 import Checkbox from "@material-ui/core/Checkbox";
 import ListItemText from "@material-ui/core/ListItemText";
+import manipulateString from "../manipulateString";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -72,9 +73,9 @@ class AddPossibilityStatement extends React.Component {
             if (this.props.encoded.indexOf(newEncoded) === -1) {
                 let cE;
                 if(agents.length > 1){
-                    cE = "true: for agents(" + agents.join(',') + ") it is possible that " + this.props.statements[this.props.pknowledge];
+                    cE = "agents(" + agents.join(',') + "~) suppose " + this.props.statements[this.props.pknowledge];
                 } else {
-                    cE = "true: for agent(" + agents.join(',') + ") it is possible that " + this.props.statements[this.props.pknowledge];
+                    cE = "agent(" + agents[0] + "~) supposes " + this.props.statements[this.props.pknowledge];
                 }
                 this.props.addStatement([cE, newEncoded]);
                 this.props.changeAgentsWithPossibleKnowledge(["agent(s)"]);
@@ -90,7 +91,6 @@ class AddPossibilityStatement extends React.Component {
         return (
             <div className='rowC'>
                 <span>&nbsp;&nbsp;&nbsp;</span>
-                <input readOnly value="FOR" className={classes.templateTexts} style={{ width: "50px"}}/>
                 <Select
                     multiple
                     value={this.props.agent2}
@@ -106,7 +106,7 @@ class AddPossibilityStatement extends React.Component {
                         </MenuItem>
                     ))}
                 </Select>
-                <input readOnly value="IT IS POSSIBLE THAT" className={classes.templateTexts} style={{ width: "150px"}}/>
+                <input readOnly value="SUPPOSE(S)" className={classes.templateTexts} style={{ width: "100px"}}/>
                 <Select
                     value={this.props.pknowledge}
                     onChange={e => this.handlePKnowledgeChange(e.target.value)}
@@ -114,7 +114,7 @@ class AddPossibilityStatement extends React.Component {
                 >
                     <option value="Select a statement" disabled>Select a statement</option>
                     {this.props.statements.map((item, index) => (
-                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)} >{item}</option>))}
+                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)} >{manipulateString(item)}</option>))}
                 </Select>
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <AddCircleRoundedIcon

@@ -37,8 +37,8 @@ class AddAffair extends React.Component {
     addAffair() {
         if (!(this.props.affair === "Select a state")) {
             let newAffairEncoded = 'a' + this.props.affair;
-            let cE = "true: state(" + this.props.affairs[this.props.affair - 1] + ")";
-            let cE2 = "false: state(" + this.props.affairs[this.props.affair - 1] + ")";
+            let cE = "state(" + this.props.affairs[this.props.affair - 1] + "~)";
+            let cE2 = "false: state(" + this.props.affairs[this.props.affair - 1] + "~)";
             if (this.props.statements.indexOf(cE) === -1 && this.props.statements.indexOf(cE2) === -1) {
                 this.props.addStatement([cE, newAffairEncoded]);
                 this.props.changeAffair("Select a state");

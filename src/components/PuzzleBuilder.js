@@ -5,6 +5,7 @@ import {bindActionCreators} from "redux";
 import {changeTruthValue, changeCommonKnowledge, addSubmitted, removeStatement, removeSubmitted, removeQuestion, changeQuestion, reset} from "../actions";
 import {connect} from "react-redux";
 import KeyInfo from "./KeyInfo";
+import manipulateString from "./manipulateString";
 import AddAffair from "./templates/AddAffair";
 import AddAndStatement from "./templates/AddAndStatement";
 import AddOrStatement from "./templates/AddOrStatement";
@@ -66,6 +67,23 @@ function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
+function formAsQuestion(questionStatement){
+    let end = "true";
+    if(questionStatement.startsWith("false:")){
+        end = "false";
+        questionStatement = questionStatement.substring(7);
+    }
+    return "Is the statement ' " + questionStatement + " ' " + end + "?";
+}
+
+function formAsAnswer(statement, answer){
+    if(statement.startsWith("false:")){
+        answer = !answer;
+        statement = statement.substring(7);
+    }
+    return statement + " is " + answer;
+}
+
 class PuzzleBuilder extends React.Component {
     constructor(props) {
         super(props);
@@ -88,8 +106,7 @@ class PuzzleBuilder extends React.Component {
             open5: false,
             isDialogOpen: false,
             answerToSubmission: false,
-            isAnswerInProcess: false,
-            isAnswerReady: false,
+            isAnswerAvailable: false,
             isQCK: false
         };
         this.handleInstructions = this.handleInstructions.bind(this);
@@ -111,12 +128,21 @@ class PuzzleBuilder extends React.Component {
         if(event){
             combEncoded = combEncoded.substring(2);
             combEncoded = combEncoded.slice(0,-1);
-            comb = comb.substring(5);
-            comb = "true" + comb;
+            comb = comb.substring(8);
+            if(comb.endsWith(")*")){
+                comb = comb.slice(0,-2);
+            } else{
+                comb = comb.slice(0,-1);
+            }
         } else {
             combEncoded = "~(" + combEncoded + ")";
-            comb = comb.substring(4);
-            comb = "false" + comb;
+            if(comb.startsWith("(") && comb.endsWith(")")){
+                comb = comb.substring(1);
+                comb = comb.slice(0,-1);
+                comb = "false: (" + comb + ")*";
+            } else{
+                comb = "false: (" + comb + ")";
+            }
         }
         this.props.changeTruthValue([index, comb, combEncoded, event]);
     }
@@ -227,7 +253,7 @@ class PuzzleBuilder extends React.Component {
     handleDialogClose(value){
         this.setState({
             isDialogOpen: false,
-            isAnswerInProcess: false,
+            isAnswerAvailable: false,
             isAnswerReady: false
         })
         if(value){
@@ -278,20 +304,17 @@ class PuzzleBuilder extends React.Component {
                 .then((response) => {
                     if(response.data != null){
                         this.setState({
-                            isDialogOpen: true,
-                            isAnswerInProcess: true
+                            isDialogOpen: true
                         })
                         APIService.getTruthValueAnswer().then((response) => {
                             if(response.data != null){
                                 if(response.data == this.state.answerToSubmission){
                                     this.setState({
-                                        isAnswerInProcess: false,
-                                        isAnswerReady: true
+                                        isAnswerAvailable: true
                                     })
-                                } else{
+                                } else if(!(response.data == "Sorry, I cannot answer your question!")){
                                     this.setState({
-                                        isAnswerInProcess: false,
-                                        isAnswerReady: true,
+                                        isAnswerAvailable: true,
                                         answerToSubmission: !this.state.answerToSubmission
                                     })
                                 }
@@ -313,7 +336,7 @@ class PuzzleBuilder extends React.Component {
         const { classes } = this.props;
         return (
             <div>
-                <Typography variant="body1" gutterBottom>Check out the EXAMPLE section to see an already filled form and read explanations about terminology.
+                <Typography variant="body1" gutterBottom>View the EXAMPLE section to read explanations about terminology and check out on some examples.
                     You can switch between the two tabs without losing your input.</Typography><br/>
                 <Typography variant="body1" gutterBottom>Do you need instructions on how to use the input form?</Typography>
                 <span>&nbsp;&nbsp;&nbsp;</span><Grid component="label" container alignItems="center" spacing={1}><Grid item>No</Grid><Grid item>
@@ -334,11 +357,11 @@ class PuzzleBuilder extends React.Component {
                 To present a piece of information like "Amy knows it is not sunny in Glasgow", you need to do the following.</p>
                     <p>1) Assuming you already named a state "it is sunny in Glasgow", use the first template to select it and then click the '+' icon to add it.
                     To use the rest of the templates, you always need to first add a state.</p>
-                    <p>2) Then you will have the statement 'true: state(it is sunny in Glasgow)' in the table 'Statements in progress' below.
-                    There you can set the statement to false. That will turn your statement into 'false: state(it is sunny in Glasgow)'.</p>
+                    <p>2) Then you will have the statement 'it is sunny in Glasgow' in the table 'Statements in progress' below. Added statements are considered true by default.
+                    You can set the statement to false using the true-false switch. That will turn your statement into 'false: (it is sunny in Glasgow)'.</p>
                     <p>3) Now you need to find the template 'agent KNOWS a statement'. Assuming you already named an agent "Amy", you select the agent Amy
-                    and the statement 'false: state(it is sunny in Glasgow)'. You can select a statement from all statements which are currently in 'Statements in progress'.
-                        Then click the '+' icon to add. The statement you just added to 'Statements in progress' says "Amy knows it is not sunny in Glasgow".</p>
+                    and the statement 'false: (it is sunny in Glasgow)'. You can select a statement from all statements which are currently in 'Statements in progress'.
+                        Then click the '+' icon to add. The statement you just added to 'Statements in progress' looks like 'Amy knows false: (it is sunny in Glasgow)' and presents "Amy knows it is not sunny in Glasgow".</p>
                 <p>⚫ To express that a statement is common knowledge, you don't use the templates. You set a statement to be common knowledge later on.</p></div><br/></div> : null}
                 <Typography variant="h6" gutterBottom>Templates to use:</Typography>
                 <TableContainer component={Paper}>
@@ -371,7 +394,8 @@ class PuzzleBuilder extends React.Component {
                         It stores the statements you generate so you can build on them until you manage to explain a piece of information from your puzzle.
                         We already explained how to do that for "Amy knows it is not sunny in Glasgow". </p>
                     <p>⚫ <span style={{fontWeight: "bold"}}>What is the 'Submitted statements' table for?</span> This table should hold only statements explaining your puzzle and in the end contain all the statements needed to fully explain it.
-                        Once you have the exact piece of information you need in 'Statements in progress', click the '✓' icon on the same line to add it to the table 'Submitted statements'.</p>
+                        Once you have the exact piece of information you need in 'Statements in progress', click the '✓' icon on the same line to add it to the table 'Submitted statements'.
+                    Here you can set a statement to be common knowledge.</p>
                     <p>⚫ <span style={{fontWeight: "bold"}}>What is the 'Your question' table for?</span> This table is for a statement which validity you want to check.
                         Decide on a question that will help you solve your puzzle. You create this statement in the usual way and after you have it in 'Statements in progress', you click the '?' icon to add it to the 'Your question' table.</p>
                     <p>⚫ You can have only one question.</p>
@@ -389,15 +413,15 @@ class PuzzleBuilder extends React.Component {
                         <TableRow>
                             <TableCell className={classes.cellFontSize} align="left">
                                 <div className='rowC'>
-                                    <span className={(this.props.truthValues[index] ? null : classes.redText)}>{index + 1}. {item}</span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                                    {(this.props.statements[index].includes(" it is possible that "))
+                                    <span className={(this.props.truthValues[index] ? null : classes.redText)}>{index + 1}. {manipulateString(item)}</span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                    {(this.props.statements[index].includes(" suppose ") || this.props.statements[index].includes(" supposes "))
                                         ? null : <Typography component="div">
                                 <Grid component="label" container alignItems="center" spacing={1}>
                                     <Grid item>False</Grid><Grid item>
                                         <AntSwitch checked={this.props.truthValues[index]} onChange={e => this.handleChange(e.target.checked, index)}/>
                                     </Grid><Grid item>True</Grid>
                                 </Grid>
-                            </Typography>}<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><AssignmentTurnedInTwoToneIcon
+                            </Typography>}<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>{this.props.submitted.indexOf(item) !== -1 ? <span>SUBMITTED</span> : null}<AssignmentTurnedInTwoToneIcon
                                 fontSize="large"
                                 color="primary"
                                 className= {(index === this.props.indexQuestion || this.props.submitted.indexOf(item) !== -1) ?
@@ -457,7 +481,7 @@ class PuzzleBuilder extends React.Component {
                                 >
                                     <Typography>Remove statement.</Typography>
                                 </Popover>
-                                    <span>&nbsp;&nbsp;&nbsp;</span><HelpIcon
+                                    <span>&nbsp;&nbsp;&nbsp;</span>{this.props.question[0] === item ? <span>SET AS A QUESTION</span> : null}<HelpIcon
                                         fontSize="large"
                                         color="primary"
                                         className= {((this.props.question && this.props.question.length) || this.props.submitted.indexOf(item) !== -1)
@@ -506,7 +530,7 @@ class PuzzleBuilder extends React.Component {
                             {this.props.submitted.map((item, index) => (
                                 <TableRow>
                                     <TableCell className={classes.cellFontSize} align="left">
-                                        {index + 1}. {item} <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                        {index + 1}. {manipulateString(item)} <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                                         <FormControlLabel
                                             control={<Switch checked={this.props.cksubmitted[index]} onChange={e => this.handleCKswitch(e.target.checked, index)}/>}
                                             label="is common knowledge"
@@ -556,7 +580,7 @@ class PuzzleBuilder extends React.Component {
                             {this.props.question.map((item) => (
                                 <TableRow>
                                     <TableCell className={classes.cellFontSize} align="left">
-                                        {item} <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><DeleteForeverOutlinedIcon
+                                        {formAsQuestion(manipulateString(item))} <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><DeleteForeverOutlinedIcon
                                         fontSize="large"
                                         color="primary"
                                         aria-owns={this.state.open4 ? 'mouse-over-popover' : undefined}
@@ -607,11 +631,13 @@ class PuzzleBuilder extends React.Component {
                 </Snackbar>
                 <Dialog aria-labelledby="simple-dialog-title" open={this.state.isDialogOpen}>
                     <DialogTitle id="simple-dialog-title">Here is the answer!</DialogTitle>
-                    {this.state.isAnswerInProcess ? <p>Submission was successful! The answer will be displayed shortly.</p> : null}
-                    {this.state.isAnswerReady ? <div style={{justifyContent: 'center'}}><span>&nbsp;</span>
-                        <p>'    Statement <span style={{fontWeight: "bold", fontSize: "24"}}>{this.props.question}</span> is <span style={{textDecorationLine: 'underline'}}>{" " + this.state.answerToSubmission}</span>.    '</p><span>&nbsp;</span>
+                    {this.state.isAnswerAvailable ? <div style={{justifyContent: 'center'}}><span>&nbsp;</span>
+                        <p>'    Statement <span style={{fontWeight: "bold", fontSize: "24"}}>{formAsAnswer(manipulateString(this.props.question[0]), this.state.answerToSubmission)}</span>.    '</p><span>&nbsp;</span>
                     <br/><Button  style={{float: 'right'}} variant="contained" color={"primary"} onClick={() => this.handleDialogClose(false)}>Update form</Button><span>&nbsp;&nbsp;&nbsp;</span>
-                        <Button  style={{float: 'left'}} variant="contained" color={"primary"} onClick={() => this.handleDialogClose(true)}>Reset form</Button></div> : null}
+                        <Button  style={{float: 'left'}} variant="contained" color={"primary"} onClick={() => this.handleDialogClose(true)}>Reset form</Button></div> :
+                        <div style={{justifyContent: 'center'}}><span>&nbsp;</span>
+                            <p>Sorry, the prover cannot answer your question. Update the form and try again.</p><span>&nbsp;</span>
+                            <br/><Button  style={{float: 'right'}} variant="contained" color={"primary"} onClick={() => this.handleDialogClose(false)}>Update form</Button></div>}
                 </Dialog>
             </div>
         )

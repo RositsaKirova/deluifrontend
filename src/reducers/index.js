@@ -1,7 +1,7 @@
 import { REMOVE_ELEMENTS, REMOVE_ELEMENT, REMOVE_STATEMENT, REMOVE_SUBMITTED, REMOVE_QUESTION, ADD_ELEMENTS, RENAME_ELEMENTS,
     ADD_STATEMENT, ADD_SUBMITTED, CHANGE_AFFAIR, CHANGE_LEFT_AND, CHANGE_RIGHT_AND, CHANGE_LEFT_OR, CHANGE_RIGHT_OR, CHANGE_LEFT_THEN,
     CHANGE_RIGHT_THEN, CHANGE_POSSIBLE_KNOWLEDGE, CHANGE_AGENTS_WITH_POSSIBLE_KNOWLEDGE, CHANGE_KNOWLEDGE, CHANGE_AGENTS_WITH_KNOWLEDGE,
-    CHANGE_COMMON_KNOWLEDGE, CHANGE_TRUTH_VALUE, CHANGE_QUESTION, RESET} from "../constants/action-types";
+    CHANGE_COMMON_KNOWLEDGE, CHANGE_TRUTH_VALUE, CHANGE_QUESTION, RESET, CHANGE_EXAMPLE} from "../constants/action-types";
 
 const initialState = {
     agents: [],
@@ -25,6 +25,7 @@ const initialState = {
     rightThen: "Select a statement",
     knows: "Select a statement",
     pknowledge: "Select a statement",
+    example: 0
 };
 
 function substringBetween(s, a, b) {
@@ -273,6 +274,7 @@ function rootReducer(state = initialState, action) {
             let elements;
             let combInProcess = state.statements.slice();
             let combSubmitted = state.submitted.slice();
+            let q = state.question.slice();
             let name = action.payload[0];
             let index = parseInt(action.payload[1]);
             let nameAfter = action.payload[2];
@@ -285,45 +287,67 @@ function rootReducer(state = initialState, action) {
                 nameBefore = elements[index];
 
                 for (let i = 0; i < combInProcess.length; i++) {
-                    while(combInProcess[i].includes('agent(' + nameBefore + ")")){
-                        let newString = combInProcess[i].replace("agent(" + nameBefore + ")", "agent(" + nameAfter + ")");
+                    while(combInProcess[i].includes('agent(' + nameBefore + "~)")){
+                        let newString = combInProcess[i].replace("agent(" + nameBefore + "~)", "agent(" + nameAfter + "~)");
                         combInProcess[i] = newString;
                     }
 
                     if(combInProcess[i].includes('agents(')){
                         let comb = combInProcess[i];
-                        let toUpdate = substringBetween(comb, "agents(", ")");
+                        let toUpdate = substringBetween(comb, "agents(", "~)");
                         while(!(toUpdate === null || toUpdate === '')){
                             if(toUpdate.includes(nameBefore)){
                                 let newSub = toUpdate.replace(nameBefore, nameAfter);
-                                let newString2 = combInProcess[i].replace("agents(" + toUpdate + ")", "agents(" + newSub + ")");
+                                let newString2 = combInProcess[i].replace("agents(" + toUpdate + "~)", "agents(" + newSub + "~)");
                                 combInProcess[i] = newString2;
                             }
-                            let newComb = comb.replace("agents(" + toUpdate + ")", "");
+                            let newComb = comb.replace("agents(" + toUpdate + "~)", "");
                             comb = newComb;
-                            toUpdate = substringBetween(comb, "agents(", ")");
+                            toUpdate = substringBetween(comb, "agents(", "~)");
                         }
                     }
                 }
 
                 for (let i = 0; i < combSubmitted.length; i++) {
-                    while(combSubmitted[i].includes('agent(' + nameBefore + ")")){
-                        let newString = combSubmitted[i].replace("agent(" + nameBefore + ")", "agent(" + nameAfter + ")");
+                    while(combSubmitted[i].includes('agent(' + nameBefore + "~)")){
+                        let newString = combSubmitted[i].replace("agent(" + nameBefore + "~)", "agent(" + nameAfter + "~)");
                         combSubmitted[i] = newString;
                     }
 
                     if(combSubmitted[i].includes('agents(')){
                         let comb = combSubmitted[i];
-                        let toUpdate = substringBetween(comb, "agents(", ")");
+                        let toUpdate = substringBetween(comb, "agents(", "~)");
                         while(!(toUpdate === null || toUpdate === '')){
                             if(toUpdate.includes(nameBefore)){
                                 let newSub = toUpdate.replace(nameBefore, nameAfter);
-                                let newString2 = combSubmitted[i].replace("agents(" + toUpdate + ")", "agents(" + newSub + ")");
+                                let newString2 = combSubmitted[i].replace("agents(" + toUpdate + "~)", "agents(" + newSub + "~)");
                                 combSubmitted[i] = newString2;
                             }
-                            let newComb = comb.replace("agents(" + toUpdate + ")", "");
+                            let newComb = comb.replace("agents(" + toUpdate + "~)", "");
                             comb = newComb;
-                            toUpdate = substringBetween(comb, "agents(", ")");
+                            toUpdate = substringBetween(comb, "agents(", "~)");
+                        }
+                    }
+                }
+
+                if(q && q.length){
+                    if(q[0].includes('agent(' + nameBefore + "~)")){
+                        let newString = q[0].replace("agent(" + nameBefore + "~)", "agent(" + nameAfter + "~)");
+                        q[0] = newString;
+                    }
+
+                    if(q[0].includes('agents(')){
+                        let toChange = q[0];
+                        let toUpdate = substringBetween(toChange, "agents(", "~)");
+                        while(!(toUpdate === null || toUpdate === '')){
+                            if(toUpdate.includes(nameBefore)){
+                                let newSub = toUpdate.replace(nameBefore, nameAfter);
+                                let newString2 = q[0].replace("agents(" + toUpdate + "~)", "agents(" + newSub + "~)");
+                                q[0] = newString2;
+                            }
+                            let newComb = toChange.replace("agents(" + toUpdate + "~)", "");
+                            toChange = newComb;
+                            toUpdate = substringBetween(toChange, "agents(", "~)");
                         }
                     }
                 }
@@ -344,16 +368,23 @@ function rootReducer(state = initialState, action) {
                 nameBefore = elements[index];
 
                 for (let i = 0; i < combInProcess.length; i++) {
-                    while(combInProcess[i].includes('state(' + nameBefore + ")")){
-                        let newString = combInProcess[i].replace("state(" + nameBefore + ")", "state(" + nameAfter + ")");
+                    while(combInProcess[i].includes('state(' + nameBefore + "~)")){
+                        let newString = combInProcess[i].replace("state(" + nameBefore + "~)", "state(" + nameAfter + "~)");
                         combInProcess[i] = newString;
                     }
                 }
 
                 for (let i = 0; i < combSubmitted.length; i++) {
-                    while(combSubmitted[i].includes('state(' + nameBefore + ")")){
-                        let newString = combSubmitted[i].replace("state(" + nameBefore + ")", "state(" + nameAfter + ")");
+                    while(combSubmitted[i].includes('state(' + nameBefore + "~)")){
+                        let newString = combSubmitted[i].replace("state(" + nameBefore + "~)", "state(" + nameAfter + "~)");
                         combSubmitted[i] = newString;
+                    }
+                }
+
+                if(q && q.length){
+                    if(q[0].includes('state(' + nameBefore + "~)")){
+                        let newString = q[0].replace("state(" + nameBefore + "~)", "state(" + nameAfter + "~)");
+                        q[0] = newString;
                     }
                 }
             }
@@ -364,6 +395,7 @@ function rootReducer(state = initialState, action) {
                 return Object.assign({}, state, {
                     statements: combInProcess,
                     submitted: combSubmitted,
+                    question: q,
                     agent: agent1,
                     agent2: agent2,
                     agents: elements
@@ -372,6 +404,7 @@ function rootReducer(state = initialState, action) {
                 return Object.assign({}, state, {
                     statements: combInProcess,
                     submitted: combSubmitted,
+                    question: q,
                     affairs: elements
                 });
             }
@@ -497,6 +530,12 @@ function rootReducer(state = initialState, action) {
                 rightThen: "Select a statement",
                 knows: "Select a statement",
                 pknowledge: "Select a statement",
+            });
+        }
+        case CHANGE_EXAMPLE: {
+            let index = action.payload;
+            return Object.assign({}, state, {
+                example: index
             });
         }
         default:
