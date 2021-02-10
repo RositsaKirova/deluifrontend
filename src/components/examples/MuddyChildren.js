@@ -38,7 +38,7 @@ function MuddyChildren() {
             <br/>
             <Typography variant="body1" gutterBottom>Try out this puzzle and see whether you received the same answer.</Typography>
             <div className="rowC">
-                <Button variant="contained" color="secondary" onClick={showAnswer}>Show answer</Button><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <Button variant="contained" color="secondary" onClick={showAnswer}>Case1: Show answer</Button><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
                 {visible ? <Typography variant="body1" gutterBottom>Statement <span style={{fontWeight: 600}}>child1 knows child1 is muddy OR child2 knows false: (child2 is muddy) is true</span>.</Typography> : null}
             </div>
             <br/>
@@ -74,7 +74,7 @@ function MuddyChildren() {
             <br/>
             <Typography variant="body1" gutterBottom>Try out this puzzle and see whether you received the same answer.</Typography>
             <div className="rowC">
-                <Button variant="contained" color="secondary" onClick={showAnswer3}>Show answer</Button><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <Button variant="contained" color="secondary" onClick={showAnswer3}>Case2: Show answer</Button><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
                 {answer3 ? <Typography variant="body1" gutterBottom>Statement <span style={{fontWeight: 600}}>child1 knows child1 is muddy is false</span>.</Typography> : null}
             </div>
         </div>

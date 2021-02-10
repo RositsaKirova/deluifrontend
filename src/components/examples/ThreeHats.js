@@ -57,7 +57,7 @@ function ThreeHats() {
             <Typography variant="body1" gutterBottom>Also change the <span style={{fontWeight: 600}}>question</span> to: Is the statement ' (prisoner1 knows prisoner1 has a blue hat OR prisoner2 knows prisoner2 has a blue hat) OR prisoner3 knows false: (prisoner3 has a blue hat) ' true?</Typography>
             <Typography variant="body1" gutterBottom>Try out this case of the puzzle and see whether you received the same answer.</Typography>
             <div className="rowC">
-                <Button variant="contained" color="secondary" onClick={showAnswer1}>Show answer</Button><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <Button variant="contained" color="secondary" onClick={showAnswer1}>Case: Show answer</Button><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
                 {answer1 ? <Typography variant="body1" gutterBottom>Statement <span style={{fontWeight: 600}}>(prisoner1 knows prisoner1 has a blue hat OR prisoner2 knows prisoner2 has a blue hat) OR prisoner3 knows false: (prisoner3 has a blue hat) is true</span>.</Typography> : null}
             </div>
             <br/>

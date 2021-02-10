@@ -47,6 +47,8 @@ function rootReducer(state = initialState, action) {
             let tValues = state.truthValues.slice();
             let combSubmitted = state.submitted.slice();
             let combSubmittedEncoded = state.submittedEncoded.slice();
+            let q = state.question.slice();
+            let qEncoded = state.questionEncoded.slice();
             let affairNumber = state.affair;
             let element;
             if (name === "agent") {
@@ -90,6 +92,15 @@ function rootReducer(state = initialState, action) {
                 combSubmittedEncoded.splice(elementToRemove, 1);
                 combSubmitted.splice(elementToRemove, 1);
             }
+            for (let j = number + 1; j <= stop.length; j++) {
+                if(q && q.length){
+                    if (qEncoded.includes(element + j)) {
+                        q = [];
+                        qEncoded = '';
+                    }
+                }
+            }
+
             if (name === "agent") {
                 return Object.assign({}, state, {
                     encoded: combInProcessEncoded,
@@ -97,6 +108,8 @@ function rootReducer(state = initialState, action) {
                     truthValues: tValues,
                     submittedEncoded: combSubmittedEncoded,
                     submitted: combSubmitted,
+                    question: q,
+                    questionEncoded: qEncoded,
                     agents: stop.slice(0,number),
                     agent: ["agent(s)"],
                     agent2: ["agent(s)"]
@@ -108,6 +121,8 @@ function rootReducer(state = initialState, action) {
                     truthValues: tValues,
                     submittedEncoded: combSubmittedEncoded,
                     submitted: combSubmitted,
+                    question: q,
+                    questionEncoded: qEncoded,
                     affairs: stop.slice(0,number),
                     affair: affairNumber,
                     leftAnd: "Select a statement",
@@ -130,6 +145,8 @@ function rootReducer(state = initialState, action) {
             let tValues = state.truthValues.slice();
             let combSubmitted = state.submitted.slice();
             let combSubmittedEncoded = state.submittedEncoded.slice();
+            let q = state.question.slice();
+            let qEncoded = state.questionEncoded.slice();
             let affairNumber = state.affair;
             let element;
             if (name === "agent") {
@@ -167,6 +184,13 @@ function rootReducer(state = initialState, action) {
                 combSubmittedEncoded.splice(elementToRemove, 1);
                 combSubmitted.splice(elementToRemove, 1);
             }
+            if(q && q.length){
+                if (q[0].includes(element + (number + 1))) {
+                    q = [];
+                    qEncoded = '';
+                }
+            }
+
             if (name === "agent") {
                 let agents = state.agents.slice();
                 agents.splice(number,1)
@@ -176,6 +200,8 @@ function rootReducer(state = initialState, action) {
                     truthValues: tValues,
                     submittedEncoded: combSubmittedEncoded,
                     submitted: combSubmitted,
+                    question: q,
+                    questionEncoded: qEncoded,
                     agents: agents,
                     agent: ["agent(s)"],
                     agent2: ["agent(s)"]
@@ -189,6 +215,8 @@ function rootReducer(state = initialState, action) {
                     truthValues: tValues,
                     submittedEncoded: combSubmittedEncoded,
                     submitted: combSubmitted,
+                    question: q,
+                    questionEncoded: qEncoded,
                     affairs: affairs,
                     affair: affairNumber,
                     leftAnd: "Select a statement",
@@ -533,9 +561,8 @@ function rootReducer(state = initialState, action) {
             });
         }
         case CHANGE_EXAMPLE: {
-            let index = action.payload;
             return Object.assign({}, state, {
-                example: index
+                example: action.payload
             });
         }
         default:
