@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const instance = axios.create({
     withCredentials: true,
-    baseURL: 'http://localhost:8081'
+    baseURL: 'http://desolate-beyond-59634.herokuapp.com/'
 })
 
 const ANSWER_API_REST_URL = "/answer";
@@ -17,11 +17,8 @@ class APIService {
     postQuestion(submittedEncoded, commonKnowledgeList, questionEncoded) {
         let formData = new FormData();
         formData.append("submittedStatements", submittedEncoded);
-        //console.log(submittedEncoded);
         formData.append("listCommonK", commonKnowledgeList);
-        //console.log(commonKnowledgeList);
         formData.append("question", questionEncoded);
-        //console.log(questionEncoded);
         return instance.post(SEND_API_REST_URL, formData, {headers:{"Content-Type" : "multipart/form-data"}});
     }
 

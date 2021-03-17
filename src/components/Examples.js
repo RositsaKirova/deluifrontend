@@ -19,16 +19,12 @@ const mapStateToProps = (state) => {
 }
 
 class Examples extends React.Component {
-    constructor(props) {
-        super(props);
-    }
 
     changeExample(index){
         this.props.changeExample(index);
     }
 
     render() {
-        const {classes} = this.props;
         return (
             <div>
                 <Typography variant="h5" color="secondary" gutterBottom>Terminology</Typography>

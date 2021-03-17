@@ -271,11 +271,12 @@ function rootReducer(state = initialState, action) {
             let agents = state.agents.slice();
             let affairs = state.affairs.slice();
             let stop;
+            let newName;
             if (name === "agent") {
                 stop = agents;
                 for (let i = stop.length + 1; i <= number; i++) {
-                    let newName = "ag".concat(i.toString());
-                    while(stop.some(item => newName === item) || affairs.some(item => newName === item)){
+                    newName = "ag".concat(i.toString());
+                    while(stop.some(item => item === newName) || affairs.some(affair => affair === newName)){
                         newName = newName.substring(2);
                         newName = "ag0".concat(newName);
                     }
@@ -287,11 +288,11 @@ function rootReducer(state = initialState, action) {
             } else {
                 stop = affairs;
                 for (let i = stop.length + 1; i <= number; i++) {
-                    let name = i.toString();
-                    while(stop.some(item => name === item) || agents.some(item => name === item)){
-                        name = "0".concat(name);
+                    newName = i.toString();
+                    while(stop.some(item => item === newName) || agents.some(item => item === newName)){
+                        newName = "0".concat(newName);
                     }
-                    stop = stop.concat(name);
+                    stop = stop.concat(newName);
                 }
                 return Object.assign({}, state, {
                     affairs: stop

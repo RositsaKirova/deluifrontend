@@ -12,7 +12,6 @@ import assistant from './images/bigbrain.jpg';
 import './App.css';
 import TabPanel from "./components/TabPanel";
 import PuzzleBuilder from "./components/PuzzleBuilder";
-//import Example from "./components/Example";
 import Examples from "./components/Examples";
 
 const useStyles = makeStyles((theme) => ({

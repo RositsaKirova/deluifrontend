@@ -114,7 +114,6 @@ class PuzzleBuilder extends React.Component {
         this.handlePopoverClose = this.handlePopoverClose.bind(this);
         this.handleDialogClose = this.handleDialogClose.bind(this);
         this.removeQuestion = this.removeQuestion.bind(this);
-        this.setAnswer = this.setAnswer.bind(this);
         this.submit = this.submit.bind(this);
     }
 
@@ -290,10 +289,6 @@ class PuzzleBuilder extends React.Component {
         this.props.removeQuestion();
     }
 
-    setAnswer(data){
-        this.props.changeAnswer(data);
-    }
-
     submit(){
         if(!(this.props.submitted.length > 0)){
             this.noSubmittedStatements();
@@ -312,13 +307,12 @@ class PuzzleBuilder extends React.Component {
                                     this.setState({
                                         isAnswerAvailable: true
                                     })
-                                } else if(!(response.data == "Sorry, I cannot answer your question!")){
+                                } else if(response.data == !this.state.answerToSubmission){
                                     this.setState({
                                         isAnswerAvailable: true,
                                         answerToSubmission: !this.state.answerToSubmission
                                     })
                                 }
-                                console.log("Answer is: " + response.data);
                             }
                         })
                             .catch(function (ex) {
