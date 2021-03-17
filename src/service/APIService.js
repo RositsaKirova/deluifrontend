@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const instance = axios.create({
     withCredentials: true,
-    baseURL: 'http://desolate-beyond-59634.herokuapp.com/'
+    baseURL: 'https://desolate-beyond-59634.herokuapp.com/'
 })
 
 const ANSWER_API_REST_URL = "/answer";
