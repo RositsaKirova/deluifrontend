@@ -1,11 +1,11 @@
-import Select from "@material-ui/core/Select";
-import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 import React from "react";
 import styles from "../stylesComponents";
 import {bindActionCreators} from "redux";
 import {addStatement, changeAffair} from "../../actions";
 import {withStyles} from "@material-ui/core/styles";
 import {connect} from "react-redux";
+import Select from "@material-ui/core/Select";
+import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators({
@@ -28,7 +28,6 @@ class AddAffair extends React.Component {
     constructor(props) {
         super(props);
         this.addAffair = this.addAffair.bind(this);
-        this.addAffair = this.addAffair.bind(this);
     }
 
     handleAffairChange = (event) => {
@@ -37,12 +36,10 @@ class AddAffair extends React.Component {
 
     addAffair() {
         if (!(this.props.affair === "Select a state")) {
-            console.log("enc: " + this.props.statements);
             let newAffairEncoded = 'a' + this.props.affair;
-            let cE = "true: state(" + this.props.affairs[this.props.affair - 1] + ")";
-            let cE2 = "false: state(" + this.props.affairs[this.props.affair - 1] + ")";
+            let cE = "state(" + this.props.affairs[this.props.affair - 1] + "~)";
+            let cE2 = "false: state(" + this.props.affairs[this.props.affair - 1] + "~)";
             if (this.props.statements.indexOf(cE) === -1 && this.props.statements.indexOf(cE2) === -1) {
-                console.log("encInProcess: " + this.props.statements);
                 this.props.addStatement([cE, newAffairEncoded]);
                 this.props.changeAffair("Select a state");
             } else {

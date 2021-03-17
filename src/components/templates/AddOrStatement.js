@@ -1,11 +1,12 @@
-import Select from "@material-ui/core/Select";
-import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 import React from "react";
 import styles from "../stylesComponents";
 import {bindActionCreators} from "redux";
 import {addStatement, changeLeftOr, changeRightOr} from "../../actions";
 import {withStyles} from "@material-ui/core/styles";
 import {connect} from "react-redux";
+import Select from "@material-ui/core/Select";
+import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
+import manipulateString from "../manipulateString";
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators({
@@ -47,7 +48,7 @@ class AddOrStatement extends React.Component {
                 let newEncodedReversed = "(" + combEncoded[this.props.rightOr] + ")|(" + combEncoded[this.props.leftOr] + ")";
                 if (combEncoded.indexOf(newEncoded) === -1 && combEncoded.indexOf(newEncodedReversed) === -1 &&
                     combEncoded.indexOf("~(" + newEncoded + ")") === -1 && combEncoded.indexOf("~(" + newEncodedReversed + ")") === -1) {
-                    let cE = "true: (" + this.props.statements[this.props.leftOr] + ") OR (" + this.props.statements[this.props.rightOr] + ")";
+                    let cE = "(" + this.props.statements[this.props.leftOr] + " OR " + this.props.statements[this.props.rightOr] + ")";
                     this.props.addStatement([cE, newEncoded]);
                     this.props.changeLeftOr("Select a statement");
                     this.props.changeRightOr("Select a statement");
@@ -72,7 +73,7 @@ class AddOrStatement extends React.Component {
                 >
                     <option value="Select a statement" disabled>Select a statement</option>
                     {this.props.statements.map((item, index) => (
-                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)}>{item}</option>))}
+                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)}>{manipulateString(item)}</option>))}
                 </Select>
                 <input readOnly value="OR" className={classes.templateTexts} style={{ width: "50px"}}/>
                 <Select
@@ -82,7 +83,7 @@ class AddOrStatement extends React.Component {
                 >
                     <option value="Select a statement" disabled>Select a statement</option>
                     {this.props.statements.map((item, index) => (
-                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)}>{item}</option>))}
+                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)}>{manipulateString(item)}</option>))}
                 </Select>
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <AddCircleRoundedIcon

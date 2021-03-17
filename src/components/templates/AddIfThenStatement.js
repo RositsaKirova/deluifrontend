@@ -1,11 +1,12 @@
-import Select from "@material-ui/core/Select";
-import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 import React from "react";
 import styles from "../stylesComponents";
 import {bindActionCreators} from "redux";
 import {addStatement, changeLeftThen, changeRightThen} from "../../actions";
 import {withStyles} from "@material-ui/core/styles";
 import {connect} from "react-redux";
+import Select from "@material-ui/core/Select";
+import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
+import manipulateString from "../manipulateString";
 
 const mapDispatchToProps = (dispatch) => {
     return bindActionCreators({
@@ -45,7 +46,7 @@ class AddIfThenStatement extends React.Component {
                 let combEncoded = this.props.encoded;
                 let newEncoded = "(" + combEncoded[this.props.leftThen] + ")->(" + combEncoded[this.props.rightThen] + ")";
                 if (combEncoded.indexOf(newEncoded) === -1 && combEncoded.indexOf("~(" + newEncoded + ")") === -1) {
-                    let cE = "true: IF (" + this.props.statements[this.props.leftThen] + ") THEN (" + this.props.statements[this.props.rightThen] + ")";
+                    let cE = "(IF " + this.props.statements[this.props.leftThen] + " THEN " + this.props.statements[this.props.rightThen] + ")";
                     this.props.addStatement([cE, newEncoded]);
                     this.props.changeLeftThen("Select a statement");
                     this.props.changeRightThen("Select a statement");
@@ -71,7 +72,7 @@ class AddIfThenStatement extends React.Component {
                 >
                     <option value="Select a statement" disabled>Select a statement</option>
                     {this.props.statements.map((item, index) => (
-                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)}>{item}</option>))}
+                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)}>{manipulateString(item)}</option>))}
                 </Select>
                 <input readOnly value="THEN" className={classes.templateTexts} style={{ width: "50px"}}/>
                 <Select
@@ -81,7 +82,7 @@ class AddIfThenStatement extends React.Component {
                 >
                     <option value="Select a statement" disabled>Select a statement</option>
                     {this.props.statements.map((item, index) => (
-                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)}>{item}</option>))}
+                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)}>{manipulateString(item)}</option>))}
                 </Select>
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <AddCircleRoundedIcon

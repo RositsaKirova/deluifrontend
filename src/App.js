@@ -12,7 +12,7 @@ import assistant from './images/bigbrain.jpg';
 import './App.css';
 import TabPanel from "./components/TabPanel";
 import PuzzleBuilder from "./components/PuzzleBuilder";
-import Example from "./components/Example";
+import Examples from "./components/Examples";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -59,17 +59,9 @@ function App() {
             <Typography variant="h4" gutterBottom>Hi, I am your Assistant!</Typography>
             <div className={classes.root2}><Avatar alt="Assistant" src={assistant} className={classes.large}/></div>
           </header>
-          <Typography variant="body1" gutterBottom>
-            Check out the EXAMPLE section to see an already filled form and read explanations about terminology.
-            You can switch between the two tabs without losing your input.
-          </Typography>
-          <br/>
-          <Typography variant="h5" color="secondary" gutterBottom>Let's puzzle our brains!</Typography>
-          <hr style={{color: '#4141D8', backgroundColor: '#4141D8',height: 5}}/>
-          <br/>
           <PuzzleBuilder />
         </TabPanel>
-        <TabPanel value={value} index={1}><Example /></TabPanel>
+        <TabPanel value={value} index={1}><Examples /></TabPanel>
       </div>
       </React.Fragment>
   );

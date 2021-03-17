@@ -1,14 +1,15 @@
-import Select from "@material-ui/core/Select";
-import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 import React from "react";
 import styles from "../stylesComponents";
 import {bindActionCreators} from "redux";
 import {addStatement, changeAgentsWithKnowledge, changeKnowledge} from "../../actions";
 import {withStyles} from "@material-ui/core/styles";
 import {connect} from "react-redux";
+import Select from "@material-ui/core/Select";
+import AddCircleRoundedIcon from "@material-ui/icons/AddCircleRounded";
 import MenuItem from "@material-ui/core/MenuItem";
 import Checkbox from "@material-ui/core/Checkbox";
 import ListItemText from "@material-ui/core/ListItemText";
+import manipulateString from "../manipulateString";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -66,14 +67,14 @@ class AddKnowledgeStatement extends React.Component {
         let agents = this.props.agent;
         if(agents && agents.length && !(this.props.knows === "Select a statement")){let indexesAgents = [];
             agents.map((item) => indexesAgents.push(this.props.agents.indexOf(item) + 1));
-            let indexAgent = "{ag" + indexesAgents.join(',ag') + "}";
-            let newEncoded = "K" + indexAgent + "(" + this.props.encoded[this.props.knows] + ")";
+            let indexAgent = "{ag" + indexesAgents.join(",ag") + "}";
+            let newEncoded = "K" + indexAgent.toString() + "(" + this.props.encoded[this.props.knows] + ")";
             if (this.props.encoded.indexOf(newEncoded) === -1 && this.props.encoded.indexOf("~(" + newEncoded + ")") === -1) {
                 let cE;
                 if(agents.length > 1){
-                    cE = "true: agents(" + agents.join(',') + ") know that (" + this.props.statements[this.props.knows] + ")";
+                    cE = "agents(" + agents.join(',') + "~) know " + this.props.statements[this.props.knows];
                 } else {
-                    cE = "true: agent(" + agents.join(',') + ") knows that (" + this.props.statements[this.props.knows] + ")";
+                    cE = "agent(" + agents[0] + "~) knows " + this.props.statements[this.props.knows];
                 }
                 this.props.addStatement([cE, newEncoded]);
                 this.props.changeAgentsWithKnowledge(["agent(s)"]);
@@ -104,7 +105,7 @@ class AddKnowledgeStatement extends React.Component {
                         </MenuItem>
                     ))}
                 </Select>
-                <input readOnly value="KNOW(S)" className={classes.templateTexts} style={{ width: "70px"}}/>
+                <input readOnly value="KNOW(S)" className={classes.templateTexts} style={{ width: "80px"}}/>
                 <Select
                     value={this.props.knows}
                     onChange={e => this.handleKnowsChange(e.target.value)}
@@ -112,7 +113,7 @@ class AddKnowledgeStatement extends React.Component {
                 >
                     <option value="Select a statement" disabled>Select a statement</option>
                     {this.props.statements.map((item, index) => (
-                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)}>{item}</option>))}
+                        <option value={index} className={(this.props.truthValues[index] ? null : classes.redText)}>{manipulateString(item)}</option>))}
                 </Select>
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <AddCircleRoundedIcon
